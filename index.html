@@ -969,14 +969,28 @@
         </div>
     </div>
 
-    <!-- MODAL: LIGHTBOX -->
-    <div id="lightboxModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4" onclick="closeLightbox()">
-        <div class="relative max-w-4xl max-h-[90vh]">
-            <img id="lightboxImage" src="" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain border border-slate-700" alt="Trade Screenshot">
-            <button class="absolute -top-4 -right-4 bg-white text-slate-900 w-9 h-9 rounded-full font-bold shadow-lg flex items-center justify-center hover:bg-slate-200 transition">
-                <i class="fa-solid fa-xmark"></i>
+    <!-- MODAL: GALLERY LIGHTBOX -->
+    <div id="lightboxModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden p-4 select-none">
+        <div class="absolute top-4 right-6 flex items-center space-x-4">
+            <span id="lightboxCounter" class="text-white text-xs font-bold bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">1 / 1</span>
+            <button onclick="closeLightbox()" class="bg-white text-slate-900 w-10 h-10 rounded-full font-bold shadow-2xl flex items-center justify-center hover:bg-slate-200 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
+        
+        <div class="relative max-w-5xl max-h-[75vh] flex items-center justify-center my-auto px-12">
+            <button onclick="slideLightbox(-1)" id="lightboxPrevBtn" class="absolute left-0 bg-slate-800/80 hover:bg-slate-700 text-white w-10 h-10 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            
+            <img id="lightboxImage" src="" class="max-w-full max-h-[72vh] rounded-xl shadow-2xl object-contain border border-slate-700" alt="Trade Screenshot">
+            
+            <button onclick="slideLightbox(1)" id="lightboxNextBtn" class="absolute right-0 bg-slate-800/80 hover:bg-slate-700 text-white w-10 h-10 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div id="lightboxThumbnails" class="flex items-center space-x-2 mt-4 max-w-full overflow-x-auto py-2 px-4 bg-slate-900/60 rounded-xl border border-slate-800"></div>
     </div>
 
     <!-- FIREBASE & CORE CLOUD SCRIPT -->
@@ -1065,6 +1079,10 @@
                 if (mainContent) mainContent.classList.add('hidden');
                 if (authControls) authControls.classList.add('hidden');
                 if (headerNewTradeBtn) headerNewTradeBtn.classList.add('hidden');
+
+                appState.trades = [];
+                appState.planners = {};
+                appState.accounts = {};
             }
         };
 
@@ -1252,14 +1270,14 @@
                         entry: 29274,
                         close: 29145,
                         volume: 1,
-                        fees: '1m',
+                        fees: '30s',
                         pnl: 1161.6,
                         returnPct: 1.16,
                         setup: 'Reversal',
                         tag: 'Discipline',
                         confluences: ['SMT', 'iFVG'],
                         notes: 'Lệnh mẫu demo cloud...',
-                        duration: '5m',
+                        duration: '30s',
                         hour: '09:30-09:40',
                         tvLink: '',
                         chartImgs: []
@@ -1797,7 +1815,7 @@
                             const ctx = canvas.getContext('2d');
                             let width = img.width;
                             let height = img.height;
-                            const maxDim = 500;
+                            const maxDim = 800;
                             if (width > height && width > maxDim) {
                                 height *= maxDim / width;
                                 width = maxDim;
@@ -1808,7 +1826,7 @@
                             canvas.width = width;
                             canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
                             currentModalImages.push(compressedDataUrl);
                             renderImagePreviews();
                         };
@@ -1927,10 +1945,13 @@
                     let imgs = Array.isArray(t.chartImgs) ? t.chartImgs : (t.chartImg ? [t.chartImg] : []);
                     let chartThumbHtml = '';
                     if (imgs.length > 0) {
+                        let thumbs = imgs.slice(0, 3).map((imgUrl, imgIdx) => `
+                            <img src="${imgUrl}" class="w-8 h-8 rounded object-cover border border-slate-300 shadow-sm cursor-pointer hover:scale-110 transition" onclick="openLightboxForTrade('${t.id}', ${imgIdx})" onerror="this.src='https://placehold.co/100x100/ef4444/ffffff?text=Lỗi'">
+                        `).join('');
                         chartThumbHtml = `
-                            <div class="flex items-center justify-center space-x-1 cursor-pointer" onclick="openLightbox('${imgs[0]}')">
-                                <i class="fa-regular fa-image text-emerald-600 text-sm"></i>
-                                <span class="text-[10px] font-bold text-slate-500">(${imgs.length})</span>
+                            <div class="flex items-center justify-center space-x-1">
+                                ${thumbs}
+                                ${imgs.length > 3 ? `<span class="text-[10px] font-bold text-slate-500">+${imgs.length - 3}</span>` : ''}
                             </div>
                         `;
                     } else {
@@ -2110,10 +2131,63 @@
             }
         }
 
-        function openLightbox(imgUrl) {
-            document.getElementById('lightboxImage').src = imgUrl;
-            document.getElementById('lightboxModal').classList.remove('hidden');
+        let currentLightboxImages = [];
+        let currentLightboxIndex = 0;
+
+        function openLightboxForTrade(tradeId, imgIndex = 0) {
+            const trade = appState.trades.find(t => t.id === tradeId);
+            if (trade) {
+                const imgs = Array.isArray(trade.chartImgs) ? trade.chartImgs : (trade.chartImg ? [trade.chartImg] : []);
+                if (imgs.length > 0) {
+                    currentLightboxImages = imgs;
+                    currentLightboxIndex = Math.max(0, Math.min(imgIndex, imgs.length - 1));
+                    renderLightbox();
+                    document.getElementById('lightboxModal').classList.remove('hidden');
+                }
+            }
         }
+
+        function renderLightbox() {
+            const imgEl = document.getElementById('lightboxImage');
+            const counterEl = document.getElementById('lightboxCounter');
+            const thumbsEl = document.getElementById('lightboxThumbnails');
+            const prevBtn = document.getElementById('lightboxPrevBtn');
+            const nextBtn = document.getElementById('lightboxNextBtn');
+
+            if (!imgEl || !counterEl || !thumbsEl) return;
+
+            imgEl.src = currentLightboxImages[currentLightboxIndex];
+            counterEl.innerText = `${currentLightboxIndex + 1} / ${currentLightboxImages.length}`;
+
+            if (currentLightboxImages.length > 1) {
+                prevBtn.classList.remove('hidden');
+                nextBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+            }
+
+            thumbsEl.innerHTML = '';
+            currentLightboxImages.forEach((url, idx) => {
+                const activeBorder = idx === currentLightboxIndex ? 'border-blue-500 ring-2 ring-blue-500/50 scale-105' : 'border-slate-700 opacity-60 hover:opacity-100';
+                thumbsEl.innerHTML += `
+                    <img src="${url}" class="w-16 h-16 rounded-lg object-cover cursor-pointer border-2 ${activeBorder} transition flex-shrink-0" onclick="selectLightboxIndex(${idx})" onerror="this.src='https://placehold.co/100x100/ef4444/ffffff?text=Lỗi'">
+                `;
+            });
+        }
+
+        function selectLightboxIndex(idx) {
+            currentLightboxIndex = idx;
+            renderLightbox();
+        }
+
+        function slideLightbox(dir) {
+            currentLightboxIndex += dir;
+            if (currentLightboxIndex < 0) currentLightboxIndex = currentLightboxImages.length - 1;
+            if (currentLightboxIndex >= currentLightboxImages.length) currentLightboxIndex = 0;
+            renderLightbox();
+        }
+
         function closeLightbox() { document.getElementById('lightboxModal').classList.add('hidden'); }
 
         function openAccountModal() { document.getElementById('accountModal').classList.remove('hidden'); }
