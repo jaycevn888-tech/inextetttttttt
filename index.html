@@ -94,7 +94,6 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
-        <!-- SIDEBAR -->
         <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-30 flex-shrink-0 select-none hidden lg:flex">
             <div class="py-6 px-4 space-y-8">
                 <div>
@@ -137,22 +136,21 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50 p-6 h-[calc(100vh-4rem)]">
             <!-- LOGIN REQUIRED BANNER (IF LOGGED OUT) -->
             <div id="loginRequiredBanner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-6 text-center mb-6">
                 <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg font-bold">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-sm font-bold text-amber-900 mb-1">Yêu cầu đăng nhập Google để sử dụng</h3>
-                <p class="text-xs text-amber-700 mb-4 max-w-md mx-auto">Dữ liệu nhật ký giao dịch của bạn được lưu trữ an toàn trên đám mây. Vui lòng đăng nhập Google để xem và quản lý dữ liệu.</p>
+                <h3 class="text-sm font-bold text-amber-900 mb-1">Yêu cầu đăng nhập Google để sử dụng dữ liệu đám mây</h3>
+                <p class="text-xs text-amber-700 mb-4 max-w-md mx-auto">Nhật ký giao dịch của bạn được lưu trữ đồng bộ 100% trên Cloud. Vui lòng đăng nhập Google để bắt đầu.</p>
                 <button onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow transition inline-flex items-center space-x-2">
                     <i class="fa-brands fa-google"></i>
                     <span>Đăng nhập ngay</span>
                 </button>
             </div>
 
-            <div id="mainDashboardContent" class="space-y-6">
+            <div id="mainDashboardContent" class="hidden space-y-6">
                 <!-- GLOBAL FILTER BAR -->
                 <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-4">
                     <div class="flex flex-wrap items-center gap-3">
@@ -760,7 +758,6 @@
         </main>
     </div>
 
-    <!-- MODAL: TRADE FORM -->
     <div id="tradeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 animate-in fade-in zoom-in duration-200">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -976,7 +973,6 @@
         </div>
     </div>
 
-    <!-- FIREBASE MODULE & REAL-TIME SYNC ENGINE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
@@ -1068,12 +1064,11 @@
                 unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        appState.trades = data.trades || [];
+                        appState.trades = Array.isArray(data.trades) ? data.trades : [];
                         appState.planners = data.planners || {};
                         appState.accounts = data.accounts || { 'Live': { name: 'Live Account', balance: 100000 } };
-                        appState.activeAccount = data.activeAccount || 'Live';
+                        appState.activeAccount = data.activeAccount || Object.keys(appState.accounts)[0] || 'Live';
                     } else {
-                        // Initialize default cloud state if empty
                         const defaultState = {
                             trades: [],
                             planners: {},
@@ -1081,10 +1076,10 @@
                             activeAccount: 'Live'
                         };
                         setDoc(userDocRef, defaultState);
-                        appState.trades = defaultState.trades;
-                        appState.planners = defaultState.planners;
+                        appState.trades = [];
+                        appState.planners = {};
                         appState.accounts = defaultState.accounts;
-                        appState.activeAccount = defaultState.activeAccount;
+                        appState.activeAccount = 'Live';
                     }
                     updateAccountSelectors();
                     switchTab(appState.currentTab, true);
@@ -1096,7 +1091,6 @@
                     unsubscribeFirestore();
                     unsubscribeFirestore = null;
                 }
-                // Clear state completely when logged out
                 appState.trades = [];
                 appState.planners = {};
                 appState.accounts = {};
@@ -1174,9 +1168,23 @@
                 modalHtml += `<option value="${key}">${acc.name} ($${acc.balance.toLocaleString()})</option>`;
             }
 
-            if (filterAcc) filterAcc.innerHTML = filterHtml;
-            if (filterAcc) filterAcc.value = appState.activeAccount;
-            if (modalAcc) modalAcc.innerHTML = modalHtml;
+            if (filterAcc) {
+                filterAcc.innerHTML = filterHtml;
+                if (appState.accounts[appState.activeAccount]) {
+                    filterAcc.value = appState.activeAccount;
+                } else {
+                    const firstKey = Object.keys(appState.accounts)[0];
+                    if (firstKey) {
+                        appState.activeAccount = firstKey;
+                        filterAcc.value = firstKey;
+                    }
+                }
+            }
+
+            if (modalAcc) {
+                modalAcc.innerHTML = modalHtml;
+                modalAcc.value = appState.activeAccount;
+            }
 
             const activeAccObj = appState.accounts[appState.activeAccount] || Object.values(appState.accounts)[0];
             if (activeAccObj) {
@@ -1273,7 +1281,7 @@
         }
 
         function getFilteredTrades() {
-            const accFilter = document.getElementById('filterAccount')?.value || 'all';
+            const accFilter = document.getElementById('filterAccount')?.value || appState.activeAccount;
             const setupFilter = document.getElementById('filterSetup')?.value || 'all';
             const tagFilter = document.getElementById('filterTag')?.value || 'all';
             const dateFrom = document.getElementById('filterDateFrom')?.value;
@@ -1290,7 +1298,8 @@
         }
 
         function applyFiltersLive() {
-            appState.activeAccount = document.getElementById('filterAccount')?.value || appState.activeAccount;
+            const accEl = document.getElementById('filterAccount');
+            if (accEl) appState.activeAccount = accEl.value;
             saveCloudData();
             switchTab(appState.currentTab);
         }
@@ -1834,7 +1843,7 @@
             const close = Number(document.getElementById('modalClose').value) || 0;
             const vol = Number(document.getElementById('modalVolume').value) || 1;
             const type = document.getElementById('modalType').value;
-            const accKey = document.getElementById('modalAccount').value;
+            const accKey = document.getElementById('modalAccount').value || appState.activeAccount;
             const accBalance = appState.accounts[accKey]?.balance || 100000;
 
             if (entry && close) {
@@ -1849,7 +1858,7 @@
 
         function calculateReturnFromPnl() {
             const pnl = Number(document.getElementById('modalPnl').value) || 0;
-            const accKey = document.getElementById('modalAccount').value;
+            const accKey = document.getElementById('modalAccount').value || appState.activeAccount;
             const accBalance = appState.accounts[accKey]?.balance || 100000;
             const returnPct = (pnl / accBalance) * 100;
             document.getElementById('modalReturnPct').value = returnPct.toFixed(2);
@@ -1963,7 +1972,7 @@
                 const t = appState.trades.find(x => x.id === tradeId);
                 if (t) {
                     document.getElementById('editTradeId').value = t.id;
-                    document.getElementById('modalAccount').value = t.account;
+                    document.getElementById('modalAccount').value = t.account || appState.activeAccount;
                     document.getElementById('modalDate').value = t.date;
                     document.getElementById('modalSymbol').value = t.symbol;
                     document.getElementById('modalType').value = t.type;
@@ -1990,8 +1999,9 @@
             } else {
                 document.getElementById('tradeModalTitle').innerText = '+ THÊM GIAO DỊCH MỚI';
                 document.getElementById('editTradeId').value = '';
-                document.getElementById('modalFees').value = '1m'; // Default 1m
-                document.getElementById('modalDuration').value = '5m'; // Default 5m
+                document.getElementById('modalAccount').value = appState.activeAccount;
+                document.getElementById('modalFees').value = '1m'; 
+                document.getElementById('modalDuration').value = '5m'; 
                 document.getElementById('modalEntry').value = '';
                 document.getElementById('modalClose').value = '';
                 document.getElementById('modalPnl').value = '';
@@ -2018,21 +2028,21 @@
                 }
 
                 const id = document.getElementById('editTradeId').value || 't-' + Date.now();
-                const account = document.getElementById('modalAccount').value;
-                const date = document.getElementById('modalDate').value;
-                const symbol = document.getElementById('modalSymbol').value;
-                const type = document.getElementById('modalType').value;
+                const account = document.getElementById('modalAccount').value || appState.activeAccount;
+                const date = document.getElementById('modalDate').value || realNow.toISOString().split('T')[0];
+                const symbol = document.getElementById('modalSymbol').value || 'NQ';
+                const type = document.getElementById('modalType').value || 'LONG';
                 const entry = Number(document.getElementById('modalEntry').value) || 0;
                 const close = Number(document.getElementById('modalClose').value) || 0;
-                const volume = Number(document.getElementById('modalVolume').value);
-                const fees = document.getElementById('modalFees').value;
-                const returnPct = Number(document.getElementById('modalReturnPct').value);
-                const setup = document.getElementById('modalSetup').value;
-                const tag = document.getElementById('modalTag').value;
-                const notes = document.getElementById('modalNotes').value;
-                const duration = document.getElementById('modalDuration').value;
-                const hour = document.getElementById('modalHour').value;
-                const tvLink = document.getElementById('modalTvLink').value;
+                const volume = Number(document.getElementById('modalVolume').value) || 1;
+                const fees = document.getElementById('modalFees').value || '1m';
+                const returnPct = Number(document.getElementById('modalReturnPct').value) || 0;
+                const setup = document.getElementById('modalSetup').value || 'Continuation';
+                const tag = document.getElementById('modalTag').value || 'Discipline';
+                const notes = document.getElementById('modalNotes').value || '';
+                const duration = document.getElementById('modalDuration').value || '5m';
+                const hour = document.getElementById('modalHour').value || '09:30-09:40';
+                const tvLink = document.getElementById('modalTvLink').value || '';
                 
                 const confluences = [];
                 document.querySelectorAll('input[name="smcConfluence"]:checked').forEach(cb => confluences.push(cb.value));
@@ -2049,6 +2059,7 @@
                 }
 
                 closeTradeModal();
+                await saveCloudData();
                 switchTab(appState.currentTab, false);
             } catch (err) {
                 console.error("Lỗi khi lưu giao dịch:", err);
@@ -2065,6 +2076,7 @@
         async function deleteTrade(id) {
             if (confirm('Bạn có chắc muốn xóa giao dịch này?')) {
                 appState.trades = appState.trades.filter(t => t.id !== id);
+                await saveCloudData();
                 switchTab(appState.currentTab, false);
             }
         }
@@ -2112,6 +2124,7 @@
                 }
                 updateAccountSelectors();
                 renderAccountManageList();
+                await saveCloudData();
                 switchTab(appState.currentTab, false);
             }
         }
@@ -2125,6 +2138,7 @@
             updateAccountSelectors();
             alert(`Đã thêm tài khoản ${accName} ($${accBal.toLocaleString()}) thành công!`);
             closeAccountModal();
+            await saveCloudData();
             switchTab(appState.currentTab, false);
         }
 
