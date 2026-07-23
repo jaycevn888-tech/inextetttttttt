@@ -42,7 +42,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-slate-900 tracking-tight leading-none text-base">jacooodevn</h1>
-                    <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Analytics Journal</span>
+                    <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Analytics Journal Cloud</span>
                 </div>
             </div>
 
@@ -57,11 +57,11 @@
                 <button onclick="openAccountManageModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 border border-slate-200">
                     <i class="fa-solid fa-gear"></i> <span>Quản lý</span>
                 </button>
-                <button onclick="resetDemoData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 border border-slate-200">
-                    <i class="fa-solid fa-rotate-right"></i> <span>Reset Demo</span>
+                <button onclick="resetCloudDemoData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 border border-slate-200">
+                    <i class="fa-solid fa-rotate-right"></i> <span>Khởi tạo Demo Cloud</span>
                 </button>
-                <button onclick="clearAllData()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 border border-rose-200">
-                    <i class="fa-solid fa-trash-can"></i> <span>Xóa tất cả</span>
+                <button onclick="clearCloudAllData()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1 border border-rose-200">
+                    <i class="fa-solid fa-trash-can"></i> <span>Xóa tất cả Cloud</span>
                 </button>
             </div>
         </div>
@@ -75,7 +75,7 @@
                 <div id="loggedOutView" class="flex items-center space-x-2">
                     <button onclick="signInWithGoogle()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center space-x-2">
                         <i class="fa-brands fa-google text-red-500"></i>
-                        <span>Đăng nhập Google</span>
+                        <span>Đăng nhập Google Cloud</span>
                     </button>
                 </div>
                 <div id="loggedInView" class="hidden flex items-center space-x-3">
@@ -134,7 +134,7 @@
                 </div>
             </div>
             <div class="p-4 border-t border-slate-200 text-center bg-white flex-shrink-0">
-                <span class="text-[11px] text-slate-400 font-medium">jacooodevn v3.0 Pro Cloud</span>
+                <span class="text-[11px] text-slate-400 font-medium">jacooodevn v3.5 Secure Cloud</span>
             </div>
         </aside>
 
@@ -143,10 +143,10 @@
             <!-- LOGIN REQUIRED BANNER -->
             <div id="loginRequiredBanner" class="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center my-auto max-w-lg mx-auto shadow-sm">
                 <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                    <i class="fa-solid fa-lock"></i>
+                    <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h3 class="text-base font-bold text-amber-900 mb-2">Yêu cầu đăng nhập Google để truy cập nhật ký</h3>
-                <p class="text-xs text-amber-700 mb-6 leading-relaxed">Hệ thống lưu trữ toàn bộ dữ liệu giao dịch 100% trên Cloud an toàn và đồng bộ đa thiết bị. Vui lòng đăng nhập Google để bắt đầu sử dụng.</p>
+                <h3 class="text-base font-bold text-amber-900 mb-2">Yêu cầu đăng nhập Google để truy cập Cloud Journal</h3>
+                <p class="text-xs text-amber-700 mb-6 leading-relaxed">Hệ thống lưu trữ 100% trên Cloud Server an toàn tuyệt đối, gắn liền với tài khoản Google của bạn và đồng bộ thời gian thực trên mọi thiết bị.</p>
                 <button onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow transition inline-flex items-center space-x-2">
                     <i class="fa-brands fa-google text-sm"></i>
                     <span>Đăng nhập Google ngay</span>
@@ -282,7 +282,7 @@
                                 <h3 class="text-xs font-bold text-slate-900 uppercase flex items-center space-x-2">
                                     <i class="fa-solid fa-shield-halved text-blue-600"></i><span>ĐÁNH GIÁ HỆ THỐNG GIAO DỊCH CHUYÊN SÂU (ADVANCED METRICS EVALUATION)</span>
                                 </h3>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Phân tích chuyên sâu tích hợp biểu đồ Cumulative P&L, Profit Factor, Risk/Reward và Win Rate cùng 12 thẻ chỉ số.</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Phân tích chuyên sâu tích hợp biểu đồ Cumulative P&L, Profit Factor, Risk/Reward và Win Rate chuẩn xác 100% từ P&L ($).</p>
                             </div>
                         </div>
 
@@ -423,12 +423,12 @@
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <span class="text-xs font-bold text-slate-600 uppercase block">SHARPE RATIO</span>
-                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSharpe">0.00</div>
+                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSharpe">6.95</div>
                                 <div class="text-[11px] text-slate-500" id="cardSharpeSub">Total Return: 0%</div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <span class="text-xs font-bold text-slate-600 uppercase block">SORTINO RATIO</span>
-                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSortino">0.00</div>
+                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSortino">N/A</div>
                                 <div class="text-[11px] text-slate-500">Downside Risk: 0.00%</div>
                             </div>
                         </div>
@@ -516,7 +516,7 @@
                             </div>
                             <div class="mt-6 pt-4 border-t border-slate-100">
                                 <button onclick="savePlannerData()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-lg shadow-md shadow-blue-500/20 transition flex items-center justify-center space-x-2">
-                                    <i class="fa-solid fa-floppy-disk"></i><span>Lưu Kế Hoạch & Ghi Chú Ngày</span>
+                                    <i class="fa-solid fa-floppy-disk"></i><span>Lưu Kế Hoạch & Ghi Chú Ngày Cloud</span>
                                 </button>
                             </div>
                         </div>
@@ -530,7 +530,7 @@
                             <h2 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
                                 <i class="fa-solid fa-list-ul text-blue-600"></i><span>DANH SÁCH NHẬT KÝ GIAO DỊCH (TRADE LOG)</span>
                             </h2>
-                            <p class="text-xs text-slate-500 mt-0.5">Danh sách các vị thế giao dịch chi tiết đồng bộ hoàn hảo với dữ liệu lịch biểu.</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Danh sách các vị thế giao dịch chi tiết đồng bộ hoàn hảo trên Cloud.</p>
                         </div>
                         <div class="flex items-center space-x-3">
                             <button onclick="exportCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-semibold transition flex items-center space-x-1.5 border border-slate-200">
@@ -929,7 +929,7 @@
             </div>
             <div class="bg-slate-50 px-6 py-3.5 border-t border-slate-200 flex justify-end space-x-3">
                 <button type="button" onclick="closeTradeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-lg text-xs transition">Hủy</button>
-                <button type="button" id="saveTradeBtn" onclick="saveTradeRecord()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-xs shadow-md shadow-blue-500/20 transition">Lưu Giao Dịch</button>
+                <button type="button" id="saveTradeBtn" onclick="saveTradeRecord()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-xs shadow-md shadow-blue-500/20 transition">Lưu Giao Dịch Cloud</button>
             </div>
         </div>
     </div>
@@ -950,7 +950,7 @@
                     <label class="font-bold text-slate-700 block mb-1">Số Vốn Khởi Tạo (Initial Balance $)</label>
                     <input type="number" id="newAccountBalance" value="100000" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium text-slate-700">
                 </div>
-                <button onclick="addNewAccount()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">Thêm Tài Khoản Tùy Chỉnh</button>
+                <button onclick="addNewAccount()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">Thêm Tài Khoản Cloud</button>
             </div>
         </div>
     </div>
@@ -959,7 +959,7 @@
     <div id="accountManageModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-sm tracking-wide">QUẢN LÝ TÀI KHOẢN GIAO DỊCH</h3>
+                <h3 class="font-bold text-sm tracking-wide">QUẢN LÝ TÀI KHOẢN CLOUD</h3>
                 <button onclick="closeAccountManageModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4 text-xs max-h-[70vh] overflow-y-auto" id="accountManageList"></div>
@@ -979,7 +979,7 @@
         </div>
     </div>
 
-    <!-- FIREBASE & CORE SCRIPT -->
+    <!-- FIREBASE & CORE CLOUD SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
@@ -1025,7 +1025,7 @@
             try {
                 await signInWithPopup(auth, googleProvider);
             } catch (error) {
-                console.error("Lỗi đăng nhập Google:", error);
+                console.error("Lỗi đăng nhập Google Cloud:", error);
                 if (error.code === 'auth/popup-blocked') {
                     alert("Popup bị chặn. Vui lòng cho phép popup cho trang này rồi thử lại.");
                 } else if (error.code !== 'auth/popup-closed-by-user') {
@@ -1097,7 +1097,7 @@
                     updateAccountSelectors();
                     switchTab(appState.currentTab, true);
                 }, (error) => {
-                    console.error("Real-time sync error:", error);
+                    console.error("Real-time cloud sync error:", error);
                 });
             } else {
                 if (unsubscribeFirestore) {
@@ -1107,7 +1107,6 @@
                 appState.trades = [];
                 appState.planners = {};
                 appState.accounts = {};
-                localStorage.clear();
                 switchTab('overview', true);
             }
         });
@@ -1143,8 +1142,11 @@
                         activeAccount: appState.activeAccount
                     }, { merge: true });
                 } catch (e) {
-                    console.error("Error saving to cloud:", e);
+                    console.error("Error saving to cloud server:", e);
+                    alert("Lỗi lưu trữ Cloud: " + e.message);
                 }
+            } else {
+                alert("Vui lòng đăng nhập Google để lưu dữ liệu lên Cloud server.");
             }
         }
 
@@ -1183,7 +1185,6 @@
             }
 
             if (filterAcc) {
-                filterHtml += '<option value="all">Tất cả tài khoản</option>';
                 filterAcc.innerHTML = filterHtml;
                 if (appState.accounts[appState.activeAccount]) {
                     filterAcc.value = appState.activeAccount;
@@ -1206,7 +1207,6 @@
 
         function switchTab(tabId, isSilent = false) {
             appState.currentTab = tabId;
-            if (!isSilent) saveCloudData();
             
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const targetTab = document.getElementById(`tab-${tabId}`);
@@ -1230,13 +1230,13 @@
             else if (tabId === 'hourly') renderHourlyPerformance();
         }
 
-        function resetDemoData() {
+        function resetCloudDemoData() {
             const user = window.firebaseAuth?.currentUser;
             if (!user) {
-                alert("Vui lòng đăng nhập Google trước.");
+                alert("Vui lòng đăng nhập Google Cloud trước.");
                 return;
             }
-            if (confirm('Khôi phục dữ liệu mẫu Demo lên tài khoản của bạn?')) {
+            if (confirm('Khởi tạo dữ liệu mẫu Demo lên Cloud server của bạn?')) {
                 appState.accounts = {
                     'Live': { name: 'Live Account', balance: 100000 },
                     'Demo': { name: 'Demo Account', balance: 50000 }
@@ -1258,7 +1258,7 @@
                         setup: 'Reversal',
                         tag: 'Discipline',
                         confluences: ['SMT', 'iFVG'],
-                        notes: 'Lệnh mẫu demo...',
+                        notes: 'Lệnh mẫu demo cloud...',
                         duration: '5m',
                         hour: '09:30-09:40',
                         tvLink: '',
@@ -1270,10 +1270,10 @@
             }
         }
 
-        function clearAllData() {
+        function clearCloudAllData() {
             const user = window.firebaseAuth?.currentUser;
             if (!user) return;
-            if (confirm('Xóa tất cả dữ liệu giao dịch trên tài khoản đám mây?')) {
+            if (confirm('Xóa toàn bộ dữ liệu trên Cloud server? Thao tác này không thể hoàn tác!')) {
                 appState.trades = [];
                 appState.planners = {};
                 saveCloudData();
@@ -1311,7 +1311,6 @@
         function applyFiltersLive() {
             const accEl = document.getElementById('filterAccount');
             if (accEl && accEl.value !== 'all') appState.activeAccount = accEl.value;
-            saveCloudData();
             switchTab(appState.currentTab);
         }
 
@@ -1478,19 +1477,16 @@
             appState.currentMonth += dir;
             if (appState.currentMonth > 11) { appState.currentMonth = 0; appState.currentYear++; }
             if (appState.currentMonth < 0) { appState.currentMonth = 11; appState.currentYear--; }
-            saveCloudData();
             renderOverview();
         }
 
         function changeOverviewYear(yearVal) {
             appState.currentYear = Number(yearVal);
-            saveCloudData();
             renderOverview();
         }
 
         function selectPlannerDateFromCalendar(dateStr) {
             appState.plannerDate = dateStr;
-            saveCloudData();
             switchTab('planner');
         }
 
@@ -1729,14 +1725,12 @@
         function selectMentalState(state) {
             if (!appState.planners[appState.plannerDate]) appState.planners[appState.plannerDate] = {};
             appState.planners[appState.plannerDate].mentalState = state;
-            saveCloudData();
             renderPlanner();
         }
 
         function selectMarketBias(bias) {
             if (!appState.planners[appState.plannerDate]) appState.planners[appState.plannerDate] = {};
             appState.planners[appState.plannerDate].marketBias = bias;
-            saveCloudData();
             renderPlanner();
         }
 
@@ -1744,13 +1738,11 @@
             document.getElementById('ratingSliderVal').innerText = `${val} / 100`;
             if (!appState.planners[appState.plannerDate]) appState.planners[appState.plannerDate] = {};
             appState.planners[appState.plannerDate].rating = Number(val);
-            saveCloudData();
         }
 
         function saveSessionNotesLive(notes) {
             if (!appState.planners[appState.plannerDate]) appState.planners[appState.plannerDate] = {};
             appState.planners[appState.plannerDate].sessionNotes = notes;
-            saveCloudData();
         }
 
         function renderDailyGoals() {
@@ -1773,7 +1765,6 @@
             const plan = appState.planners[appState.plannerDate];
             if (plan && plan.goals && plan.goals[idx]) {
                 plan.goals[idx].completed = !plan.goals[idx].completed;
-                saveCloudData();
             }
         }
 
@@ -1783,14 +1774,13 @@
                 if (!appState.planners[appState.plannerDate]) appState.planners[appState.plannerDate] = { goals: [] };
                 if (!appState.planners[appState.plannerDate].goals) appState.planners[appState.plannerDate].goals = [];
                 appState.planners[appState.plannerDate].goals.push({ text: goalText, completed: false });
-                saveCloudData();
                 renderDailyGoals();
             }
         }
 
         function savePlannerData() {
             saveCloudData();
-            alert('Đã lưu kế hoạch và ghi chú ngày thành công!');
+            alert('Đã lưu kế hoạch và ghi chú ngày lên Cloud thành công!');
         }
 
         let currentModalImages = [];
@@ -1807,7 +1797,7 @@
                             const ctx = canvas.getContext('2d');
                             let width = img.width;
                             let height = img.height;
-                            const maxDim = 600;
+                            const maxDim = 500;
                             if (width > height && width > maxDim) {
                                 height *= maxDim / width;
                                 width = maxDim;
@@ -1818,7 +1808,7 @@
                             canvas.width = width;
                             canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
                             currentModalImages.push(compressedDataUrl);
                             renderImagePreviews();
                         };
@@ -2056,7 +2046,7 @@
 
                 if (saveBtn) {
                     saveBtn.disabled = true;
-                    saveBtn.innerText = 'Đang lưu...';
+                    saveBtn.innerText = 'Đang lưu lên Cloud...';
                 }
 
                 const id = document.getElementById('editTradeId').value || 't-' + Date.now();
@@ -2101,19 +2091,19 @@
                 await saveCloudData();
                 switchTab(appState.currentTab, false);
             } catch (err) {
-                console.error("Lỗi khi lưu giao dịch:", err);
+                console.error("Lỗi khi lưu giao dịch lên Cloud:", err);
                 alert("Đã xảy ra lỗi khi lưu giao dịch: " + err.message);
             } finally {
                 if (saveBtn) {
                     saveBtn.disabled = false;
-                    saveBtn.innerText = 'Lưu Giao Dịch';
+                    saveBtn.innerText = 'Lưu Giao Dịch Cloud';
                 }
             }
         }
 
         function editTrade(id) { openTradeModal(id); }
         async function deleteTrade(id) {
-            if (confirm('Bạn có chắc muốn xóa giao dịch này?')) {
+            if (confirm('Bạn có chắc muốn xóa giao dịch này trên Cloud?')) {
                 appState.trades = appState.trades.filter(t => t.id !== id);
                 await saveCloudData();
                 switchTab(appState.currentTab, false);
@@ -2155,7 +2145,7 @@
         }
 
         async function deleteAccount(accKey) {
-            if (confirm(`Bạn có chắc muốn xóa tài khoản "${accKey}"? Tất cả giao dịch của tài khoản này cũng sẽ bị xóa vĩnh viễn!`)) {
+            if (confirm(`Bạn có chắc muốn xóa tài khoản "${accKey}" trên Cloud?`)) {
                 delete appState.accounts[accKey];
                 appState.trades = appState.trades.filter(t => t.account !== accKey);
                 if (appState.activeAccount === accKey) {
@@ -2175,7 +2165,7 @@
             appState.accounts[key] = { name: accName, balance: accBal };
             appState.activeAccount = key;
             updateAccountSelectors();
-            alert(`Đã thêm tài khoản ${accName} ($${accBal.toLocaleString()}) thành công!`);
+            alert(`Đã thêm tài khoản ${accName} ($${accBal.toLocaleString()}) lên Cloud thành công!`);
             closeAccountModal();
             await saveCloudData();
             switchTab(appState.currentTab, false);
