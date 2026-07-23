@@ -33,6 +33,7 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
 
+    <!-- HEADER CỐ ĐỊNH -->
     <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-sm flex-shrink-0">
         <div class="flex items-center space-x-6">
             <div class="flex items-center space-x-2">
@@ -71,7 +72,7 @@
             </button>
             
             <div id="authContainer" class="flex items-center space-x-3 pl-4 border-l border-slate-200">
-                <div id="loggedOutView" class="flex items-center space-x-2">
+                <div id="loggedOutView" class="hidden flex items-center space-x-2">
                     <button onclick="signInWithGoogle()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center space-x-2">
                         <i class="fa-brands fa-google text-red-500"></i>
                         <span>Đăng nhập Google</span>
@@ -94,6 +95,7 @@
     </header>
 
     <div class="flex-1 flex overflow-hidden relative">
+        <!-- SIDEBAR CỐ ĐỊNH -->
         <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-30 flex-shrink-0 select-none hidden lg:flex">
             <div class="py-6 px-4 space-y-8">
                 <div>
@@ -136,20 +138,22 @@
             </div>
         </aside>
 
+        <!-- MAIN CONTENT -->
         <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50 p-6 h-[calc(100vh-4rem)]">
-            <!-- LOGIN REQUIRED BANNER (IF LOGGED OUT) -->
-            <div id="loginRequiredBanner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-6 text-center mb-6">
-                <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3 text-lg font-bold">
+            <!-- LOGIN REQUIRED BANNER -->
+            <div id="loginRequiredBanner" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-8 text-center my-auto max-w-lg mx-auto shadow-sm">
+                <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-sm font-bold text-amber-900 mb-1">Yêu cầu đăng nhập Google để sử dụng dữ liệu đám mây</h3>
-                <p class="text-xs text-amber-700 mb-4 max-w-md mx-auto">Nhật ký giao dịch của bạn được lưu trữ đồng bộ 100% trên Cloud. Vui lòng đăng nhập Google để bắt đầu.</p>
-                <button onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow transition inline-flex items-center space-x-2">
-                    <i class="fa-brands fa-google"></i>
-                    <span>Đăng nhập ngay</span>
+                <h3 class="text-base font-bold text-amber-900 mb-2">Yêu cầu đăng nhập Google để truy cập nhật ký</h3>
+                <p class="text-xs text-amber-700 mb-6 leading-relaxed">Hệ thống lưu trữ toàn bộ dữ liệu giao dịch 100% trên Cloud an toàn và đồng bộ đa thiết bị. Vui lòng đăng nhập Google để bắt đầu.</p>
+                <button onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow transition inline-flex items-center space-x-2">
+                    <i class="fa-brands fa-google text-sm"></i>
+                    <span>Đăng nhập Google ngay</span>
                 </button>
             </div>
 
+            <!-- DASHBOARD CONTENT -->
             <div id="mainDashboardContent" class="hidden space-y-6">
                 <!-- GLOBAL FILTER BAR -->
                 <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-4">
@@ -271,6 +275,7 @@
                         </div>
                     </div>
 
+                    <!-- ADVANCED METRICS -->
                     <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-6">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
                             <div>
@@ -758,6 +763,7 @@
         </main>
     </div>
 
+    <!-- MODAL: ADD/EDIT TRADE -->
     <div id="tradeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8 animate-in fade-in zoom-in duration-200">
             <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
@@ -973,6 +979,7 @@
         </div>
     </div>
 
+    <!-- FIREBASE & CORE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
@@ -1100,6 +1107,7 @@
         });
     </script>
 
+    <!-- APP LOGIC -->
     <script>
         const realNow = new Date();
         let appState = {
@@ -1222,7 +1230,7 @@
         function resetDemoData() {
             const user = window.firebaseAuth?.currentUser;
             if (!user) {
-                alert("Vui lòng đăng nhập Google để reset dữ liệu mẫu.");
+                alert("Vui lòng đăng nhập Google trước.");
                 return;
             }
             if (confirm('Khôi phục dữ liệu mẫu Demo lên tài khoản của bạn?')) {
@@ -1247,11 +1255,11 @@
                         setup: 'Reversal',
                         tag: 'Discipline',
                         confluences: ['SMT', 'iFVG'],
-                        notes: 'Lệnh này cả ngày nó chạy nhiều rồi nhưng vẫn còn 1 cái PWL...',
+                        notes: 'Lệnh này cả ngày nó chạy nhiều rồi...',
                         duration: '30s',
                         hour: '09:30-09:40',
                         tvLink: '',
-                        chartImgs: ['https://placehold.co/600x400/1e293b/ffffff?text=Trade+Chart']
+                        chartImgs: []
                     }
                 ];
                 saveCloudData();
@@ -1789,8 +1797,29 @@
                 for (let i = 0; i < files.length; i++) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        currentModalImages.push(e.target.result);
-                        renderImagePreviews();
+                        // Nén ảnh gọn nhẹ trước khi đẩy vào mảng
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            let width = img.width;
+                            let height = img.height;
+                            const maxDim = 800;
+                            if (width > height && width > maxDim) {
+                                height *= maxDim / width;
+                                width = maxDim;
+                            } else if (height > maxDim) {
+                                width *= maxDim / height;
+                                height = maxDim;
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                            currentModalImages.push(compressedDataUrl);
+                            renderImagePreviews();
+                        };
+                        img.src = e.target.result;
                     };
                     reader.readAsDataURL(files[i]);
                 }
@@ -1826,7 +1855,7 @@
                 currentModalImages.forEach((imgUrl, idx) => {
                     list.innerHTML += `
                         <div class="relative group">
-                            <img src="${imgUrl}" class="h-20 w-20 rounded-lg object-cover border border-slate-300 shadow-sm">
+                            <img src="${imgUrl}" class="h-20 w-20 rounded-lg object-cover border border-slate-300 shadow-sm" onerror="this.src='https://placehold.co/200x200/ef4444/ffffff?text=Lỗi+Ảnh'">
                             <button type="button" onclick="removeModalImage(${idx})" class="absolute -top-2 -right-2 bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow hover:bg-rose-700 transition">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
@@ -1903,7 +1932,7 @@
                         confluencesHtml = `<span class="text-slate-400 text-[10px]">--</span>`;
                     }
 
-                    let imgs = t.chartImgs || (t.chartImg ? [t.chartImg] : []);
+                    let imgs = Array.isArray(t.chartImgs) ? t.chartImgs : (t.chartImg ? [t.chartImg] : []);
                     let chartThumbHtml = '';
                     if (imgs.length > 0) {
                         chartThumbHtml = `
@@ -1924,11 +1953,11 @@
                             <td class="p-3.5 ${pnlColor}">${pnlFormatted}</td>
                             <td class="p-3.5 ${retColor}">${Number(t.returnPct)>=0?'+':''}${t.returnPct}%</td>
                             <td class="p-3.5">${t.volume}</td>
-                            <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono text-[11px] font-bold">${t.fees}</span></td>
+                            <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono text-[11px] font-bold">${t.fees || '1m'}</span></td>
                             <td class="p-3.5">${t.entry}</td>
                             <td class="p-3.5">${t.close}</td>
                             <td class="p-3.5 text-slate-500">${t.hour}</td>
-                            <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px]">${t.duration}</span></td>
+                            <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px]">${t.duration || '5m'}</span></td>
                             <td class="p-3.5"><span class="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full text-[10px] font-bold">${t.setup}</span></td>
                             <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-semibold">${t.tag}</span></td>
                             <td class="p-3.5">${confluencesHtml}</td>
@@ -1950,7 +1979,7 @@
             let csvContent = "data:text/csv;charset=utf-8,Symbol,P%26L,Volume,EntryTimeframe,Entry,Close,Date\n";
             const filteredTrades = getFilteredTrades();
             filteredTrades.forEach(t => {
-                csvContent += `${t.symbol},${t.pnl},${t.volume},${t.fees},${t.entry},${t.close},${t.date}\n`;
+                csvContent += `${t.symbol},${t.pnl},${t.volume},${t.fees || '1m'},${t.entry},${t.close},${t.date}\n`;
             });
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -1993,7 +2022,7 @@
                         cb.checked = t.confluences && t.confluences.includes(cb.value);
                     });
 
-                    currentModalImages = t.chartImgs || (t.chartImg ? [t.chartImg] : []);
+                    currentModalImages = Array.isArray(t.chartImgs) ? [...t.chartImgs] : (t.chartImg ? [t.chartImg] : []);
                     renderImagePreviews();
                 }
             } else {
