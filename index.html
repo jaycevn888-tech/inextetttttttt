@@ -33,6 +33,7 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
 
+    <!-- HEADER CỐ ĐỊNH -->
     <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-sm flex-shrink-0">
         <div class="flex items-center space-x-6">
             <div class="flex items-center space-x-2">
@@ -1182,15 +1183,12 @@
             }
 
             if (filterAcc) {
+                filterHtml += '<option value="all">Tất cả tài khoản</option>';
                 filterAcc.innerHTML = filterHtml;
                 if (appState.accounts[appState.activeAccount]) {
                     filterAcc.value = appState.activeAccount;
                 } else {
-                    const firstKey = Object.keys(appState.accounts)[0];
-                    if (firstKey) {
-                        appState.activeAccount = firstKey;
-                        filterAcc.value = firstKey;
-                    }
+                    filterAcc.value = 'all';
                 }
             }
 
@@ -1294,7 +1292,7 @@
         }
 
         function getFilteredTrades() {
-            const accFilter = document.getElementById('filterAccount')?.value || appState.activeAccount;
+            const accFilter = document.getElementById('filterAccount')?.value || 'all';
             const setupFilter = document.getElementById('filterSetup')?.value || 'all';
             const tagFilter = document.getElementById('filterTag')?.value || 'all';
             const dateFrom = document.getElementById('filterDateFrom')?.value;
@@ -1312,7 +1310,7 @@
 
         function applyFiltersLive() {
             const accEl = document.getElementById('filterAccount');
-            if (accEl) appState.activeAccount = accEl.value;
+            if (accEl && accEl.value !== 'all') appState.activeAccount = accEl.value;
             saveCloudData();
             switchTab(appState.currentTab);
         }
@@ -1574,8 +1572,9 @@
         }
 
         function renderAdvancedCards(filteredTrades, netProfit, wins, losses, totalTrades, balance) {
-            const validWins = filteredTrades.filter(t => Number(t.pnl) > 0);
-            const validLosses = filteredTrades.filter(t => Number(t.pnl) < 0);
+            const validTrades = filteredTrades.filter(t => Number(t.pnl) !== 0);
+            const validWins = validTrades.filter(t => Number(t.pnl) > 0);
+            const validLosses = validTrades.filter(t => Number(t.pnl) < 0);
 
             const grossProfit = validWins.reduce((s,t) => s + Number(t.pnl), 0);
             const grossLoss = Math.abs(validLosses.reduce((s,t) => s + Number(t.pnl), 0));
@@ -1808,7 +1807,7 @@
                             const ctx = canvas.getContext('2d');
                             let width = img.width;
                             let height = img.height;
-                            const maxDim = 800;
+                            const maxDim = 600;
                             if (width > height && width > maxDim) {
                                 height *= maxDim / width;
                                 width = maxDim;
@@ -1819,7 +1818,7 @@
                             canvas.width = width;
                             canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
                             currentModalImages.push(compressedDataUrl);
                             renderImagePreviews();
                         };
@@ -2032,6 +2031,7 @@
                 document.getElementById('tradeModalTitle').innerText = '+ THÊM GIAO DỊCH MỚI';
                 document.getElementById('editTradeId').value = '';
                 document.getElementById('modalAccount').value = appState.activeAccount;
+                document.getElementById('modalDate').value = realNow.toISOString().split('T')[0];
                 document.getElementById('modalFees').value = '1m'; 
                 document.getElementById('modalDuration').value = '5m'; 
                 document.getElementById('modalEntry').value = '';
@@ -2088,6 +2088,13 @@
                     appState.trades[existingIdx] = tradeObj;
                 } else {
                     appState.trades.unshift(tradeObj);
+                }
+
+                const dfFrom = document.getElementById('filterDateFrom');
+                const dfTo = document.getElementById('filterDateTo');
+                if (dfFrom && dfTo) {
+                    if (date < dfFrom.value) dfFrom.value = date;
+                    if (date > dfTo.value) dfTo.value = date;
                 }
 
                 closeTradeModal();
