@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>jacooodevn - Analytics Journal Secure</title>
+    <title>jacooodevn - Analytics Journal Online</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
@@ -31,12 +29,39 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    
+        /* sticky-layer-fix */
+        #globalFilterBar {
+            background: #ffffff !important;
+            z-index: 30;
+            flex-shrink: 0;
+            border-radius: 0.75rem;
+        }
+        #appSidebar {
+            background: #ffffff !important;
+            z-index: 40;
+        }
+        header {
+            background: #ffffff !important;
+            z-index: 50;
+        }
+
+    
+        /* data-pro-tab lock style */
+        [data-pro-tab].opacity-60 .sidebar-label::after {
+            content: ' PRO';
+            font-size: 9px;
+            font-weight: 800;
+            color: #7c3aed;
+            margin-left: 4px;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
 
     <!-- HEADER -->
-    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-40 shadow-sm flex-shrink-0">
+    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-50">
         <div class="flex items-center space-x-6">
             <div class="flex items-center space-x-2">
                 <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-500/20">
@@ -44,7 +69,9 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-slate-900 tracking-tight leading-none text-base">jacooodevn</h1>
-                    <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Analytics Journal Secure</span>
+                    <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Analytics Journal Online</span>
+                    <span id="planBadge" class="text-[10px] font-black px-2 py-0.5 rounded-md bg-violet-600 text-white tracking-wide ml-1">PRO</span>
+                    <button type="button" id="upgradePlanBtn" onclick="showUpgradeModal('Pro Plan')" class="hidden text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition ml-1">Nang cap Pro</button>
                 </div>
             </div>
 
@@ -85,93 +112,104 @@
             
             <div id="authContainer" class="flex items-center space-x-3 pl-4 border-l border-slate-200">
                 <div id="authLoggedOut" class="flex items-center space-x-2">
-                    <button onclick="signInWithGoogle()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center space-x-2">
+                    <button type="button" id="btnGoogleSignInHeader" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition flex items-center space-x-2">
                         <i class="fa-brands fa-google text-red-500"></i>
-                        <span>Đăng nhập Google</span>
+                        <span>Dang nhap Google</span>
                     </button>
                 </div>
                 <div id="authLoggedIn" class="hidden flex items-center space-x-3">
                     <div class="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
                         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span class="text-xs font-semibold text-emerald-700" id="vaultStatusBadge">Vault khóa</span>
+                        <span class="text-xs font-semibold text-emerald-700" id="vaultStatusBadge">Vault</span>
                     </div>
                     <div class="text-right hidden sm:block">
                         <div class="text-xs font-bold text-slate-900" id="userName">User</div>
-                        <div class="text-[10px] text-slate-500" id="userEmail">user@gmail.com</div>
+                        <div class="text-[10px] text-slate-500" id="userEmail"></div>
                     </div>
-                    <div id="userAvatarContainer" class="w-9 h-9 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow">U</div>
-                    <button onclick="handleLogout()" title="Đăng xuất" class="text-slate-400 hover:text-rose-600 p-1.5 transition">
+                    <button type="button" onclick="handleLogout()" title="Logout" class="text-slate-400 hover:text-rose-600 p-1.5">
                         <i class="fa-solid fa-right-from-bracket text-sm"></i>
                     </button>
                 </div>
             </div>
         </div>
+    </div>
     </header>
 
     <!-- BODY LAYOUT -->
     <div class="flex-1 flex overflow-hidden relative">
         <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-30 flex-shrink-0 select-none hidden lg:flex">
-            <div class="py-6 px-4 space-y-8">
+        <aside id="appSidebar" class="bg-white border-r border-slate-200 flex flex-col justify-between sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden z-40 flex-shrink-0 select-none hidden lg:flex transition-all duration-300 ease-in-out w-64" data-collapsed="false">
+            <!-- Toggle -->
+            <div class="flex items-center justify-end px-2 pt-3 pb-1 flex-shrink-0">
+                <button type="button" onclick="toggleSidebarCollapse()" id="sidebarCollapseBtn" title="Thu gọn / Mở rộng" class="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow transition">
+                    <i id="sidebarCollapseIcon" class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+            </div>
+            <div class="py-2 px-2 space-y-4 flex-1">
+                <!-- GENERAL -->
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-3">General</h3>
-                    <nav class="space-y-1">
-                        <button onclick="switchTab('overview')" id="nav-overview" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-chart-pie w-5 text-center text-slate-500"></i><span>Overview</span>
+                    <div class="sidebar-section-title px-3 mb-1.5">
+                        <span class="sidebar-label text-[10px] font-bold text-slate-400 uppercase tracking-wider">General</span>
+                        <div class="sidebar-section-dot hidden w-full flex justify-center py-1">
+                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        </div>
+                    </div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchTab('overview')" id="nav-overview" title="Overview" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-chart-pie w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Overview</span>
                         </button>
-                        <button onclick="switchTab('planner')" id="nav-planner" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-calendar-days w-5 text-center text-slate-500"></i><span>Daily Planner</span>
+                        <button onclick="switchTab('planner')" id="nav-planner" title="Daily Planner" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-calendar-days w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Daily Planner</span>
                         </button>
-                        <button onclick="switchTab('tradelog')" id="nav-tradelog" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-list-ul w-5 text-center text-slate-500"></i><span>Trade Log</span>
+                        <button onclick="switchTab('tradelog')" id="nav-tradelog" title="Trade Log" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-list-ul w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Trade Log</span>
                         </button>
-                        <button onclick="switchTab('winrate')" id="nav-winrate" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-percent w-5 text-center text-slate-500"></i><span>Winrate Analysis</span>
+                        <button onclick="switchTab('winrate')" id="nav-winrate" data-pro-tab="winrate" title="Winrate Analysis" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-percent w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Winrate Analysis</span>
                         </button>
-                    </nav>
+                    </div>
                 </div>
+                <!-- TIME ANALYSIS -->
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-3">Time Analysis</h3>
-                    <nav class="space-y-1">
-                        <button onclick="switchTab('byday')" id="nav-byday" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-calendar-week w-5 text-center text-slate-500"></i><span>By Day Of Week</span>
+                    <div class="sidebar-section-title px-3 mb-1.5">
+                        <span class="sidebar-label text-[10px] font-bold text-slate-400 uppercase tracking-wider">Time Analysis</span>
+                        <div class="sidebar-section-dot hidden w-full flex justify-center py-1">
+                            <span class="w-6 border-t border-slate-200"></span>
+                        </div>
+                    </div>
+                    <div class="space-y-0.5">
+                        <button onclick="switchTab('byday')" id="nav-byday" data-pro-tab="byday" title="By Day Of Week" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-calendar-week w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">By Day Of Week</span>
                         </button>
-                        <button onclick="switchTab('weekly')" id="nav-weekly" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-chart-column w-5 text-center text-slate-500"></i><span>Weekly Breakdown</span>
+                        <button onclick="switchTab('weekly')" id="nav-weekly" data-pro-tab="weekly" title="Weekly Breakdown" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-chart-column w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Weekly Breakdown</span>
                         </button>
-                        <button onclick="switchTab('monthly')" id="nav-monthly" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-calendar-alt w-5 text-center text-slate-500"></i><span>Monthly Results</span>
+                        <button onclick="switchTab('monthly')" id="nav-monthly" data-pro-tab="monthly" title="Monthly Results" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-calendar-alt w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Monthly Results</span>
                         </button>
-                        <button onclick="switchTab('hourly')" id="nav-hourly" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
-                            <i class="fa-solid fa-clock w-5 text-center text-slate-500"></i><span>Hourly Performance (22 ICT Macros)</span>
+                        <button onclick="switchTab('hourly')" id="nav-hourly" data-pro-tab="hourly" title="Hourly Performance" class="sidebar-nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-clock w-5 text-center text-slate-500 flex-shrink-0"></i>
+                            <span class="sidebar-label whitespace-nowrap">Hourly Performance</span>
                         </button>
-                    </nav>
+                    </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-slate-200 text-center bg-white flex-shrink-0">
-                <span class="text-[11px] text-slate-400 font-medium">jacooodevn v3.8 E2E Secure (Supabase)</span>
+            <div class="p-3 border-t border-slate-200 text-center bg-white flex-shrink-0 overflow-hidden">
+                <span class="sidebar-label text-[10px] text-slate-400 font-medium whitespace-nowrap">jacooodevn v3.8 Secure</span>
             </div>
         </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 flex flex-col overflow-y-auto bg-slate-50 p-6 h-[calc(100vh-4rem)]">
-            <!-- LOGIN REQUIRED BANNER -->
-            <div id="loginRequiredBanner" class="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center my-auto max-w-lg mx-auto shadow-sm">
-                <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h3 class="text-base font-bold text-amber-900 mb-2">Đăng nhập Google + Master Password để mở Vault</h3>
-                <p class="text-xs text-amber-700 mb-6 leading-relaxed">Hệ thống lưu trữ 100%  Server an toàn tuyệt đối, gắn liền với tài khoản Google của bạn và đồng bộ thời gian thực trên mọi thiết bị.</p>
-                <button onclick="signInWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-5 py-3 rounded-xl shadow transition inline-flex items-center space-x-2">
-                    <i class="fa-brands fa-google text-sm"></i>
-                    <span>Đăng nhập Google</span>
-                </button>
-            </div>
-
-            <!-- DASHBOARD CONTAINER -->
-            <div id="mainDashboardContent" class="hidden space-y-6">
-                <!-- GLOBAL FILTER BAR -->
-                <div class="bg-white rounded-xl border border-slate-200 p-3.5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex-1 flex flex-col min-w-0 h-[calc(100vh-4rem)] bg-slate-50">
+            <!-- GLOBAL FILTER BAR -->
+                <div id="globalFilterBar" class="flex-shrink-0 z-30 bg-white border border-slate-200 rounded-xl shadow-sm mx-6 mt-4 mb-0 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2">
                     <div class="flex flex-wrap items-center gap-3">
                         <div class="flex items-center space-x-2 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
                             <i class="fa-solid fa-filter"></i><span>BỘ LỌC</span>
@@ -185,12 +223,58 @@
                         <div class="flex items-center space-x-2">
                             <span class="text-xs text-slate-500 font-medium">Setup:</span>
                             <select id="filterSetup" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium text-slate-700">
-                                <option value="all">Tất cả Setup</option>
+                                <option value="all">All Setup</option>
                                 <option value="Continuation">Continuation</option>
                                 <option value="Reversal">Reversal</option>
-                                <option value="Breakout">Breakout</option>
+                                <option value="bb">Breaker Block</option>
+                                <option value="ob">Order Block</option>
+                                <option value="fvg">Fair Value Gap</option>
+                                <option value="liqui_sweep">Liquidity Sweep</option>
                             </select>
                         </div>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-500 font-medium">KQ:</span>
+                            <select id="filterResult" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium text-slate-700">
+                                <option value="all">All</option>
+                                <option value="win">Win</option>
+                                <option value="loss">Loss</option>
+                                <option value="be">BE</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-500 font-medium">Symbol:</span>
+                            <select id="filterSymbol" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium text-slate-700">
+                                <option value="all">All Symbol</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-slate-500 font-medium">RR%:</span>
+                            <select id="filterRR" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium text-slate-700">
+                                <option value="all">All</option>
+                                <option value="pos">Return &gt; 0%</option>
+                                <option value="neg">Return &lt; 0%</option>
+                                <option value="ge1">Return ≥ 1%</option>
+                                <option value="ge2">Return ≥ 2%</option>
+                                <option value="le-1">Return ≤ -1%</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Side:</span>
+                            <select id="filterType" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Hour:</span>
+                            <select id="filterHour" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All Hour</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Loss:</span>
+                            <select id="filterLossReason" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Win:</span>
+                            <select id="filterWinReason" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Hold:</span>
+                            <select id="filterHold" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Emotion:</span>
+                            <select id="filterEmotion" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option></select></div>
+                        <div class="flex items-center space-x-2"><span class="text-xs text-slate-500 font-medium">Conf:</span>
+                            <select id="filterConfluence" onchange="applyFiltersLive()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700"><option value="all">All</option></select></div>
+
+
                         <div class="flex items-center space-x-2 bg-slate-50 border border-slate-300 px-2.5 py-1.5 rounded-lg text-xs">
                             <input type="date" id="filterDateFrom" class="bg-transparent text-slate-700 focus:outline-none font-medium">
                             <span class="text-slate-400">đến</span>
@@ -203,6 +287,38 @@
                         <span id="activeMonthDisplay">Tháng đang chọn: Tháng 7 / 2026</span>
                     </div>
                 </div>
+            <main class="flex-1 overflow-y-auto p-6">
+            <!-- LOGIN REQUIRED BANNER -->
+            <div id="loginRequiredBanner" class="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center my-12 max-w-md mx-auto shadow-sm">
+                <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-base font-bold text-amber-900 mb-2">Dang nhap Google + Master Password</h3>
+                <p class="text-xs text-amber-700 mb-5 leading-relaxed">Du lieu ma hoa E2E, luu online tren Supabase, dong bo moi thiet bi.</p>
+                <button type="button" id="btnGoogleSignIn" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow transition inline-flex items-center justify-center gap-2 mb-3">
+                    <i class="fa-brands fa-google"></i>
+                    <span>Dang nhap Google</span>
+                </button>
+                <div class="relative flex items-center my-3">
+                    <div class="flex-grow border-t border-amber-200"></div>
+                    <span class="flex-shrink mx-2 text-[10px] text-amber-700">hoac email</span>
+                    <div class="flex-grow border-t border-amber-200"></div>
+                </div>
+                <div class="space-y-2.5 text-left">
+                    <input id="emailAuthEmail" type="email" placeholder="Email" class="w-full border border-amber-200 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:border-blue-500">
+                    <input id="emailAuthPass" type="password" placeholder="Password (min 6)" class="w-full border border-amber-200 rounded-lg px-3 py-2 text-xs bg-white focus:outline-none focus:border-blue-500">
+                    <div class="flex gap-2">
+                        <button type="button" id="btnSignIn" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2.5 rounded-lg">Sign in</button>
+                        <button type="button" id="btnSignUp" class="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold px-3 py-2.5 rounded-lg">Sign up</button>
+                    </div>
+                    <p id="authMsg" class="text-[11px] text-rose-600 hidden"></p>
+                    <p class="text-[10px] text-amber-800/80 leading-relaxed">Google can host HTTPS (Netlify) hoac localhost. Mo file:// chi dung duoc Email.</p>
+                </div>
+            </div>
+
+            <!-- DASHBOARD CONTAINER -->
+            <div id="mainDashboardContent" class="hidden space-y-6">
+                
 
                 <!-- TAB 1: OVERVIEW -->
                 <div id="tab-overview" class="space-y-6 tab-content">
@@ -385,10 +501,10 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-                                <span class="text-xs font-bold text-slate-600 uppercase block">DURATION ANALYSIS</span>
+                                <span class="text-xs font-bold text-slate-600 uppercase block">ENTRY HOUR ANALYSIS</span>
                                 <div class="grid grid-cols-2 gap-2 pt-2 text-xs">
-                                    <div class="bg-white p-2 rounded border border-slate-200"><span class="text-[10px] text-slate-400 block">HIGHEST WIN RATE</span><strong class="text-emerald-600" id="cardHighestDuration">--</strong></div>
-                                    <div class="bg-white p-2 rounded border border-slate-200"><span class="text-[10px] text-slate-400 block">LEAST PROFITABLE</span><strong class="text-slate-600" id="cardLeastDuration">--</strong></div>
+                                    <div class="bg-white p-2 rounded border border-slate-200"><span class="text-[10px] text-slate-400 block">BEST HOUR (WR)</span><strong class="text-emerald-600 whitespace-nowrap" id="cardHighestDuration">--</strong></div>
+                                    <div class="bg-white p-2 rounded border border-slate-200"><span class="text-[10px] text-slate-400 block">WORST HOUR (WR)</span><strong class="text-slate-600 whitespace-nowrap" id="cardLeastDuration">--</strong></div>
                                 </div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
@@ -419,7 +535,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <span class="text-xs font-bold text-slate-600 uppercase block">RECOVERY FACTOR</span>
-                                <div class="text-2xl font-black text-slate-800 my-2" id="cardRecoveryFactor">0.00</div>
+                                <div class="text-2xl font-black text-slate-800 my-2" id="cardRecoveryFactor">N/A</div>
                                 <div class="text-[11px] text-slate-500 flex justify-between"><span id="cardRecNet">Net: $0</span><span id="cardRecDD">DD: $0</span></div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
@@ -429,7 +545,7 @@
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <span class="text-xs font-bold text-slate-600 uppercase block">SHARPE RATIO</span>
-                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSharpe">6.95</div>
+                                <div class="text-2xl font-black text-slate-800 my-2" id="cardSharpe">N/A</div>
                                 <div class="text-[11px] text-slate-500" id="cardSharpeSub">Total Return: 0%</div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
@@ -440,18 +556,18 @@
                         </div>
                     </div>
 
-                    <!-- REVERSED SECTION 2: ADVANCED SYSTEM ANALYTICS (TOP 5 EMOTIONS, ERRORS & WINRATE METRICS) -->
+                    <!-- REVERSED SECTION 2: ADVANCED SYSTEM ANALYTICS (EMOTIONS, ERRORS, HOLD & WIN REASONS) -->
                     <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
                         <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
                             <div>
                                 <h3 class="text-xs font-bold text-slate-900 uppercase flex items-center space-x-2">
-                                    <i class="fa-solid fa-brain text-purple-600"></i><span>ADVANCED SYSTEM ANALYTICS (TOP 5 EMOTIONS, ERRORS & WINRATE METRICS)</span>
+                                    <i class="fa-solid fa-brain text-purple-600"></i><span>ADVANCED SYSTEM ANALYTICS (EMOTIONS, ERRORS, HOLD & WIN REASONS)</span>
                                 </h3>
-                                <p class="text-[11px] text-slate-500 mt-0.5">Top 5 frequent emotional states, top 5 error causes, and top 5 winrate indicators derived from logged trades.</p>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Top 5 emotional states, error causes, hold management, and win reasons from logged trades.</p>
                             </div>
                             <span class="text-[10px] font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg">AI ANALYTICS</span>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                             <!-- Top 5 Emotional States -->
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <div class="flex justify-between items-center">
@@ -475,16 +591,63 @@
                             <!-- Top 5 Winrate Metrics/Indicators -->
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-xs font-bold text-slate-600 uppercase">TOP 5 WINRATE METRICS</span>
+                                    <span class="text-xs font-bold text-slate-600 uppercase">TOP 5 WIN REASON</span>
                                     <i class="fa-solid fa-award text-emerald-500"></i>
                                 </div>
                                 <div id="topWinrateMetricsContainer" class="space-y-1 text-xs pt-1">
-                                    <div class="text-slate-400 italic">Chưa đủ dữ liệu winrate</div>
+                                    <div class="text-slate-400 italic">Chưa đủ dữ liệu Win Reason</div>
+                                </div>
+                            </div>
+                            <!-- Top 5 Hold Management -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-bold text-slate-600 uppercase">TOP 5 HOLD MANAGEMENT</span>
+                                    <i class="fa-solid fa-hand-holding-hand text-amber-500"></i>
+                                </div>
+                                <div id="topHoldContainer" class="space-y-1 text-xs pt-1">
+                                    <div class="text-slate-400 italic">Chưa có dữ liệu hold</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                            
+                    <div id="rrStatsSection" data-pro-only="1" class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+                        <div class="pb-2 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-slate-900 uppercase flex items-center space-x-2">
+                                <i class="fa-solid fa-scale-balanced text-blue-600"></i><span>RISK / REWARD STATISTICS</span>
+                            </h3>
+                            <span class="text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">RR = P&amp;L ÷ Risk</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Avg RR</div>
+                                <div id="rrAvg" class="text-sm font-bold text-slate-800 mt-0.5">N/A</div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Highest RR</div>
+                                <div id="rrMax" class="text-sm font-bold text-violet-600 mt-0.5">N/A</div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Lowest RR</div>
+                                <div id="rrMin" class="text-sm font-bold text-rose-600 mt-0.5">N/A</div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Avg Risk</div>
+                                <div id="riskAvg" class="text-sm font-bold text-slate-800 mt-0.5">N/A</div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Highest Risk</div>
+                                <div id="riskMax" class="text-sm font-bold text-amber-600 mt-0.5">N/A</div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 text-center">
+                                <div class="text-[9px] text-slate-400 font-semibold uppercase tracking-wide">Lowest Risk</div>
+                                <div id="riskMin" class="text-sm font-bold text-slate-600 mt-0.5">N/A</div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Công thức: RR = P&amp;L ÷ Risk (vd Risk $500 · lãi $1500 = 3R). Chỉ tính lệnh có nhập Risk.</p>
+                    </div>
+
+                </div><!-- /tab-overview -->
 
                 <!-- TAB 2: DAILY PLANNER -->
                 <div id="tab-planner" class="space-y-6 tab-content hidden">
@@ -601,10 +764,12 @@
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                                         <th class="p-3.5">Symbol</th>
+                                        <th class="p-3.5">Risk ($)</th>
                                         <th class="p-3.5">P&L ($)</th>
                                         <th class="p-3.5">Lợi nhuận (%)</th>
+                                        <th class="p-3.5">RR</th>
                                         <th class="p-3.5">Direction / Lot</th>
-                                        <th class="p-3.5">Entry Timeframe</th>
+                                        <th class="p-3.5">Entry</th>
                                         <th class="p-3.5">Entry Price</th>
                                         <th class="p-3.5">Close Price</th>
                                         <th class="p-3.5">Giờ vào lệnh</th>
@@ -613,7 +778,7 @@
                                         <th class="p-3.5">Loss Reason</th>
                                         <th class="p-3.5">Win Reason</th>
                                         <th class="p-3.5">Hold Mgmt</th>
-                                        <th class="p-3.5">Emotional State</th>
+                                        <th class="p-3.5">Emotional</th>
                                         <th class="p-3.5">Confluences</th>
                                         <th class="p-3.5">Nội dung ghi chú</th>
                                         <th class="p-3.5 text-center">Chart</th>
@@ -793,14 +958,14 @@
                 <!-- TAB 8: HOURLY PERFORMANCE -->
                 <div id="tab-hourly" class="space-y-6 tab-content hidden">
                     <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-6">
-                        <h2 class="text-sm font-bold text-slate-900">HOURLY PERFORMANCE (22 ICT MACROS)</h2>
+                        <h2 class="text-sm font-bold text-slate-900">HOURLY PERFORMANCE</h2>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <h3 class="text-xs font-bold text-slate-600 uppercase mb-3">TRADES DISTRIBUTION BY ICT MACROS</h3>
+                                <h3 class="text-xs font-bold text-slate-600 uppercase mb-3">TRADES DISTRIBUTION BY HOUR</h3>
                                 <div class="h-64"><canvas id="macroTradesChart"></canvas></div>
                             </div>
                             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <h3 class="text-xs font-bold text-slate-600 uppercase mb-3">PERFORMANCE BY ICT MACROS</h3>
+                                <h3 class="text-xs font-bold text-slate-600 uppercase mb-3">PERFORMANCE BY HOUR</h3>
                                 <div class="h-64"><canvas id="macroPerfChart"></canvas></div>
                             </div>
                         </div>
@@ -808,7 +973,7 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
-                                        <th class="p-3.5">ICT MACRO INTERVAL</th><th class="p-3.5">NET PROFIT</th><th class="p-3.5">TRADES</th><th class="p-3.5">VOLUMES</th><th class="p-3.5">WIN RATE</th>
+                                        <th class="p-3.5">HOUR INTERVAL</th><th class="p-3.5">NET PROFIT</th><th class="p-3.5">TRADES</th><th class="p-3.5">VOLUMES</th><th class="p-3.5">WIN RATE</th>
                                     </tr>
                                 </thead>
                                 <tbody id="macroTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700"></tbody>
@@ -818,6 +983,7 @@
                 </div>
             </div>
         </main>
+        </div><!-- /main-column -->
     </div>
 
     <!-- MODAL: ADD / EDIT TRADE (COMPACT & REDESIGNED) -->
@@ -871,11 +1037,11 @@
                         <input type="number" step="any" id="modalVolume" value="1" oninput="calculateTradeResults()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">Entry Timeframe</label>
+                        <label class="font-bold text-slate-700 block mb-1">Entry</label>
                         <select id="modalFees" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
                             <option value="30s">30 giây (30s)</option>
                             <option value="1m" selected>1 phút (1m)</option>
-                            <option value="5m">5 phút (5m)</option>
+                            <option value="5m">6 phút (5m)</option>
                             <option value="10m">10 phút (10m)</option>
                             <option value="30m">30 phút (30m)</option>
                             <option value="1h+">1 giờ trở lên (1h+)</option>
@@ -885,7 +1051,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Kết quả P&L ($) *</label>
-                        <input type="number" step="any" id="modalPnl" oninput="calculateReturnFromPnl()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-emerald-600 focus:outline-none focus:border-blue-500" placeholder="e.g. 1161.6">
+                        <input type="number" step="any" id="modalPnl" oninput="calculateReturnFromPnl(); updateModalRR();" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-emerald-600 focus:outline-none focus:border-blue-500" placeholder="e.g. 1161.6">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">Risk / SL ($) <span class="text-slate-400 font-medium">(1R)</span></label>
+                        <input type="number" step="any" id="modalRisk" oninput="updateModalRR()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-bold text-slate-700 focus:outline-none focus:border-blue-500" placeholder="e.g. 500">
+                        <p class="text-[10px] text-slate-400 mt-1">RR = P&L / Risk · <span id="modalRRPreview" class="font-bold text-blue-600">--</span></p>
                     </div>
                     <div>
                         <label class="font-bold text-slate-700 block mb-1" id="modalReturnPctLabel">Lợi nhuận (%)</label>
@@ -894,11 +1065,15 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">Trading Setup / Chiến lược</label>
+                        <label class="font-bold text-slate-700 block mb-1">Setup</label>
                         <select id="modalSetup" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
-                            <option value="Continuation">Continuation (Tiếp diễn)</option>
-                            <option value="Reversal">Reversal (Đảo chiều)</option>
-                            <option value="Breakout">Breakout (Phá vỡ)</option>
+                            <option value="">-- Select Setup --</option>
+                            <option value="Continuation">Continuation</option>
+                            <option value="Reversal">Reversal</option>
+                            <option value="bb">Breaker Block</option>
+                            <option value="ob">Order Block</option>
+                            <option value="fvg">Fair Value Gap</option>
+                            <option value="liqui_sweep">Liquidity Sweep</option>
                         </select>
                     </div>
                 </div>
@@ -909,68 +1084,69 @@
                         <label class="font-bold text-slate-700 block mb-1">Loss Reason</label>
                         <select id="modalLossReason" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
                             <option value="">-- None / Win --</option>
-                            <option value="SL">SL</option>
-                            <option value="bias">bias</option>
-                            <option value="trailing SL">trailing SL</option>
-                            <option value="bad entry">bad entry</option>
-                            <option value="external factors">external factors</option>
-                            <option value="psychology">psychology</option>
+                            <option value="wrong_bias">Wrong bias</option>
+                            <option value="no_confirmation">No confirmation</option>
+                            <option value="early_entry">Early entry</option>
+                            <option value="late_entry">Late entry</option>
+                            <option value="counter_trend">Counter trend</option>
+                            <option value="bad_sl">Bad SL</option>
+                            <option value="sl_too_tight">SL too tight</option>
+                            <option value="overrisk">Overrisk</option>
+                            <option value="revenge_trade">Revenge trade</option>
+                            <option value="fomo">FOMO</option>
+                            <option value="overtrade">Overtrade</option>
+                            <option value="news_volatility">News volatility</option>
                         </select>
                     </div>
                     <div>
                         <label class="font-bold text-slate-700 block mb-1">Win Reason</label>
                         <select id="modalWinReason" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
                             <option value="">-- None / Loss --</option>
-                            <option value="correct bias">correct bias</option>
-                            <option value="SL">SL</option>
+                            <option value="correct_bias">Correct bias</option>
+                            <option value="htf_alignment">HTF alignment</option>
+                            <option value="clean_setup">Clean setup</option>
+                            <option value="good_entry">Good entry</option>
+                            <option value="liquidity_taken">Liquidity taken</option>
+                            <option value="strong_momentum">Strong momentum</option>
+                            <option value="rr_respected">RR respected</option>
+                            <option value="patient_hold">Patient hold</option>
+                            <option value="session_timing">Session timing</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- HOLD MANAGEMENT (FLAT LIST, NO HEADERS) -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <label class="font-bold text-slate-700 block mb-1">Hold Management Evaluation</label>
+                    <label class="font-bold text-slate-700 block mb-1">Hold Management</label>
                     <select id="modalHoldMgmt" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
-                        <option value="">-- Select Hold Evaluation --</option>
-                        <option value="hold_discipline">hold_discipline</option>
-                        <option value="hold_to_tp">hold_to_tp</option>
-                        <option value="hold_correct_bias">hold_correct_bias</option>
-                        <option value="early_exit">early_exit</option>
-                        <option value="fear_close">fear_close</option>
-                        <option value="greed_hold">greed_hold</option>
-                        <option value="hope_hold">hope_hold</option>
-                        <option value="move_sl">move_sl</option>
-                        <option value="overmanage">overmanage</option>
+                        <option value="">-- Select Hold Management --</option>
+                        <option value="hold_to_tp">Hold to TP</option>
+                        <option value="hold_runner">Hold runner</option>
+                        <option value="early_exit">Early exit</option>
+                        <option value="fear_close">Fear close</option>
+                        <option value="greed_hold">Greed hold</option>
+                        <option value="move_sl_be">Move SL to BE</option>
+                        <option value="move_sl_lock">Move SL lock profit</option>
+                        <option value="move_sl_bad">Move SL bad</option>
+                        <option value="overmanage">Overmanage</option>
+                        <option value="no_management">No management</option>
                     </select>
                 </div>
 
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <label class="font-bold text-slate-700 block mb-1">Emotional State Evaluation (Mental)</label>
+                    <label class="font-bold text-slate-700 block mb-1">Emotional</label>
                     <select id="modalEmotionalState" class="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
-                        <option value="">-- Select Emotional State --</option>
-                        <optgroup label="Positive Emotions">
-                            <option value="Confident">Confident</option>
-                            <option value="Calm">Calm</option>
-                            <option value="Disciplined">Disciplined</option>
-                            <option value="Patient">Patient</option>
-                            <option value="Focused">Focused</option>
-                            <option value="Objective">Objective</option>
-                            <option value="In control">In control</option>
-                            <option value="Relaxed">Relaxed</option>
-                            <option value="Trusting system">Trusting system</option>
-                        </optgroup>
-                        <optgroup label="Negative Emotions">
-                            <option value="Fear">Fear</option>
-                            <option value="FOMO">FOMO</option>
-                            <option value="Greed">Greed</option>
-                            <option value="Impatient">Impatient</option>
-                            <option value="Anxious">Anxious</option>
-                            <option value="Stressed">Stressed</option>
-                            <option value="Confused">Confused</option>
-                            <option value="Angry">Angry</option>
-                            <option value="Revenge trading">Revenge trading</option>
-                            <option value="Self-doubt">Self-doubt</option>
-                        </optgroup>
+                        <option value="">-- Select Emotional --</option>
+                        <option value="calm">Calm</option>
+                        <option value="confident">Confident</option>
+                        <option value="focused">Focused</option>
+                        <option value="neutral">Neutral</option>
+                        <option value="fomo">FOMO</option>
+                        <option value="fear">Fear</option>
+                        <option value="greedy">Greedy</option>
+                        <option value="revenge">Revenge</option>
+                        <option value="impatient">Impatient</option>
+                        <option value="tilted">Tilted</option>
                     </select>
                 </div>
 
@@ -984,6 +1160,7 @@
                         <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="smcConfluence" value="OB" class="accent-blue-600"> <span>OB</span></label>
                         <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="smcConfluence" value="Unicorn" class="accent-blue-600"> <span>Unicorn</span></label>
                         <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="smcConfluence" value="iFVG" class="accent-blue-600"> <span>iFVG</span></label>
+                        <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="smcConfluence" value="BPR" class="accent-blue-600"> <span>BPR</span></label>
                     </div>
                 </div>
                 <div>
@@ -1003,28 +1180,28 @@
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">Giờ vào lệnh (22 ICT Macros)</label>
+                        <label class="font-bold text-slate-700 block mb-1">Giờ vào lệnh</label>
                         <select id="modalHour" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium text-slate-700 focus:outline-none focus:border-blue-500">
                             <option value="09:30-09:40">09:30-09:40</option>
                             <option value="09:40-09:50">09:40-09:50</option>
-                            <option value="09:50-10:10 (AM Macro)">09:50-10:10 (AM Macro)</option>
+                            <option value="09:50-10:10">09:50-10:10</option>
                             <option value="10:10-10:20">10:10-10:20</option>
                             <option value="10:20-10:30">10:20-10:30</option>
                             <option value="10:30-10:40">10:30-10:40</option>
                             <option value="10:40-10:50">10:40-10:50</option>
-                            <option value="10:50-11:10 (AM Macro)">10:50-11:10 (AM Macro)</option>
+                            <option value="10:50-11:10">10:50-11:10</option>
                             <option value="11:10-11:20">11:10-11:20</option>
                             <option value="11:20-11:30">11:20-11:30</option>
                             <option value="11:30-11:40">11:30-11:40</option>
                             <option value="11:40-11:50">11:40-11:50</option>
-                            <option value="11:50-12:10 (Macro)">11:50-12:10 (Macro)</option>
+                            <option value="11:50-12:10">11:50-12:10</option>
                             <option value="12:10-12:20">12:10-12:20</option>
                             <option value="12:20-12:30">12:20-12:30</option>
                             <option value="12:30-12:40">12:30-12:40</option>
                             <option value="12:40-12:50">12:40-12:50</option>
                             <option value="12:50-01:00">12:50-01:00</option>
                             <option value="01:00-01:10">01:00-01:10</option>
-                            <option value="01:10-01:40 (Macro)">01:10-01:40 (Macro)</option>
+                            <option value="01:10-01:40">01:10-01:40</option>
                             <option value="01:40-01:50">01:40-01:50</option>
                             <option value="01:50-02:00">01:50-02:00</option>
                         </select>
@@ -1069,8 +1246,8 @@
                 <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-2 text-indigo-900">
                     <span class="font-bold block"><i class="fa-solid fa-circle-info mr-1"></i> Hướng dẫn định dạng (Mỗi dòng 1 lệnh):</span>
                     <p class="text-[11px] leading-relaxed font-mono bg-white p-2.5 rounded border border-indigo-100">
-                        Date, Symbol, Type, Entry, Close, Volume, PnL, Setup, LossReason, WinReason, HoldMgmt, EmotionalState<br>
-                        Ví dụ: 2026-07-22, NQ, LONG, 20000, 20100, 1, 500, Reversal, , correct bias, hold_discipline, Confident
+                        Date, Symbol, Type, Entry, Close, Volume, PnL, Risk, Hour, Setup, LossReason, WinReason, HoldMgmt, EmotionalState<br>
+                        Ví dụ: 2026-07-22, NQ, LONG, 20000, 20100, 1, 1500, 500, 09:30-09:40, Continuation, , correct_bias, hold_to_tp, calm
                     </p>
                 </div>
                 <div>
@@ -1136,88 +1313,143 @@
         </div>
     </div>
 
-    <!-- MODAL: GALLERY LIGHTBOX (MULTI-IMAGE VIEWER) -->
+    <!-- MODAL: GALLERY LIGHTBOX -->
     <div id="lightboxModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden p-4 select-none">
-        <div class="absolute top-4 right-6 flex items-center space-x-4">
+        <div class="absolute top-4 right-6 flex items-center space-x-4 z-20">
             <span id="lightboxCounter" class="text-white text-xs font-bold bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">1 / 1</span>
-            <button onclick="closeLightbox()" class="bg-white text-slate-900 w-10 h-10 rounded-full font-bold shadow-2xl flex items-center justify-center hover:bg-slate-200 transition">
+            <button type="button" onclick="closeLightbox()" class="bg-white text-slate-900 w-10 h-10 rounded-full font-bold shadow-2xl flex items-center justify-center hover:bg-slate-200 transition">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
-        
-        <div class="relative max-w-6xl max-h-[75vh] flex items-center justify-center my-auto px-16 w-full">
-            <button onclick="slideLightbox(-1)" id="lightboxPrevBtn" class="absolute left-2 bg-slate-800/80 hover:bg-slate-700 text-white w-12 h-12 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10 text-lg">
+        <div class="relative max-w-[98vw] max-h-[92vh] flex items-center justify-center my-auto px-14 w-full">
+            <button type="button" onclick="slideLightbox(-1)" id="lightboxPrevBtn" class="absolute left-2 bg-slate-800/80 hover:bg-slate-700 text-white w-12 h-12 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10 text-lg">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
-            
-            <img id="lightboxImage" src="" class="max-w-full max-h-[72vh] rounded-xl shadow-2xl object-contain border border-slate-700 mx-auto" alt="Trade Screenshot">
-            
-            <button onclick="slideLightbox(1)" id="lightboxNextBtn" class="absolute right-2 bg-slate-800/80 hover:bg-slate-700 text-white w-12 h-12 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10 text-lg">
+            <img id="lightboxImage" src="" class="max-w-[96vw] max-h-[90vh] w-auto h-auto rounded-xl shadow-2xl object-contain border border-slate-700 mx-auto" style="image-rendering: auto; -ms-interpolation-mode: bicubic;" alt="Trade Screenshot">
+            <button type="button" onclick="slideLightbox(1)" id="lightboxNextBtn" class="absolute right-2 bg-slate-800/80 hover:bg-slate-700 text-white w-12 h-12 rounded-full flex items-center justify-center border border-slate-700 transition shadow-xl z-10 text-lg">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
         </div>
-
         <div id="lightboxThumbnails" class="flex items-center space-x-2 mt-4 max-w-full overflow-x-auto py-2 px-4 bg-slate-900/60 rounded-xl border border-slate-800"></div>
     </div>
-
-
-    <!-- MODAL: MASTER PASSWORD SETUP / UNLOCK -->
-    <div id="vaultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-slate-900 text-white px-6 py-4">
-                <h3 class="font-bold text-sm tracking-wide" id="vaultModalTitle">MỞ VAULT BẢO MẬT</h3>
-                <p class="text-[11px] text-slate-300 mt-1" id="vaultModalSub">Nhập Master Password để giải mã dữ liệu trên máy bạn.</p>
-            </div>
-            <div class="p-6 space-y-4 text-xs">
-                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-800 leading-relaxed">
-                    <strong>Quan trọng:</strong> Master Password <u>không bao giờ</u> được gửi lên server.
-                    Mất mật khẩu này = <strong>mất toàn bộ dữ liệu</strong> (không thể khôi phục).
-                </div>
-                <div id="vaultSetupExtra" class="hidden space-y-3">
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Tạo Master Password mới</label>
-                        <input type="password" id="vaultPass1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium" placeholder="Tối thiểu 8 ký tự, nên mạnh">
-                    </div>
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Nhập lại Master Password</label>
-                        <input type="password" id="vaultPass2" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium" placeholder="Nhập lại">
-                    </div>
-                </div>
-                <div id="vaultUnlockExtra" class="space-y-3">
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Master Password</label>
-                        <input type="password" id="vaultPassUnlock" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium" placeholder="Nhập Master Password" onkeydown="if(event.key==='Enter')confirmVaultPassword()">
-                    </div>
-                </div>
-                <p id="vaultError" class="text-rose-600 font-semibold hidden"></p>
-                <button onclick="confirmVaultPassword()" id="vaultConfirmBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">
-                    Mở Vault
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SUPABASE + E2E ENCRYPTION VERSION -->
+    <!-- LOCAL STORAGE VERSION -->
     <script>
-        // ========== SUPABASE CONFIG (ĐIỀN CỦA BẠN) ==========
+
+        // ========== APP STATE ==========
+        const realNow = new Date();
+        let appState = {
+            currentTab: 'overview',
+            currentYear: realNow.getFullYear(),
+            currentMonth: realNow.getMonth(),
+            plannerDate: toLocalISODate(realNow),
+            activeAccount: 'Live',
+            accounts: { 'Live': { name: 'Live Account', balance: 100000 } },
+            trades: [],
+            planners: {},
+            plan: (localStorage.getItem('jj_plan') || 'pro') // 'basic' | 'pro' — default pro khi test
+        };
+
+        const PRO_TABS = ['winrate', 'byday', 'weekly', 'monthly', 'hourly'];
+        const PRO_FEATURES = {
+            rrStats: true,
+            advancedAnalytics: true,
+            batchImport: true,
+            exportCsv: true
+        };
+
+        function isPro() {
+            return String(appState.plan || 'basic').toLowerCase() === 'pro';
+        }
+
+        function requirePro(featureName) {
+            if (isPro()) return true;
+            showUpgradeModal(featureName || 'Pro');
+            return false;
+        }
+
+        function setPlan(plan) {
+            appState.plan = plan === 'pro' ? 'pro' : 'basic';
+            try { localStorage.setItem('jj_plan', appState.plan); } catch(e) {}
+            updatePlanBadge();
+            // refresh current tab gates
+            if (typeof switchTab === 'function') switchTab(appState.currentTab || 'overview', true);
+        }
+
+        function updatePlanBadge() {
+            const el = document.getElementById('planBadge');
+            const btn = document.getElementById('upgradePlanBtn');
+            if (el) {
+                if (isPro()) {
+                    el.innerText = 'PRO';
+                    el.className = 'text-[10px] font-black px-2 py-0.5 rounded-md bg-violet-600 text-white tracking-wide';
+                } else {
+                    el.innerText = 'BASIC';
+                    el.className = 'text-[10px] font-black px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 tracking-wide';
+                }
+            }
+            if (btn) btn.classList.toggle('hidden', isPro());
+            // sidebar pro locks
+            document.querySelectorAll('[data-pro-tab]').forEach(btnNav => {
+                const locked = !isPro();
+                btnNav.classList.toggle('opacity-60', locked);
+                const lock = btnNav.querySelector('.pro-lock-icon');
+                if (lock) lock.classList.toggle('hidden', !locked);
+            });
+            // pro-only UI blocks on overview
+            const rr = document.getElementById('rrStatsSection');
+            if (rr) rr.style.display = isPro() ? '' : 'none';
+            document.querySelectorAll('[data-pro-only]').forEach(n => {
+                n.style.display = isPro() ? '' : 'none';
+            });
+        }
+
+        function showUpgradeModal(featureName) {
+            const modal = document.getElementById('upgradeModal');
+            const nameEl = document.getElementById('upgradeFeatureName');
+            if (nameEl) nameEl.innerText = featureName || 'tinh nang Pro';
+            if (modal) modal.classList.remove('hidden');
+        }
+        function closeUpgradeModal() {
+            const modal = document.getElementById('upgradeModal');
+            if (modal) modal.classList.add('hidden');
+        }
+        let filterApplied = false;
+        let byDayCurrentWeekStart = new Date();
+        let weeklyMonthCurrent = { year: realNow.getFullYear(), month: realNow.getMonth() };
+
+        // ========== SUPABASE ==========
         const SUPABASE_URL = 'https://mndfpejztiftikeaegkn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1uZGZwZWp6dGlmdGlrZWFlZ2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5OTE2NzEsImV4cCI6MjEwMDU2NzY3MX0.XcmFGJaEFh239iFU8-EiaVqf49xe66MoJklneD-vqzI';
 
         let supabaseClient = null;
-        try {
-            if (SUPABASE_URL && !SUPABASE_URL.includes('YOUR_') && window.supabase) {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-        } catch (e) { console.warn('Supabase init failed', e); }
-
-        // ========== E2E CRYPTO (Web Crypto API) ==========
-        let vaultKey = null;          // CryptoKey in memory only
-        let vaultUnlocked = false;
-        let vaultIsSetupMode = false; // true = first time create password
         let currentUser = null;
+        let vaultKey = null;
+        let vaultUnlocked = false;
 
+        const VAULT_SESSION_MS = 6 * 60 * 1000;
+        function markVaultSession() {
+            try { sessionStorage.setItem('jacooodevn_vault_until', String(Date.now() + VAULT_SESSION_MS)); } catch(_) {}
+        }
+        function isVaultSessionValid() {
+            try { return Date.now() < Number(sessionStorage.getItem('jacooodevn_vault_until') || 0); } catch(_) { return false; }
+        }
+
+        let vaultIsSetupMode = false;
+        let didInitialUnlockRender = false;
+
+        function initSupabase() {
+            try {
+                if (window.supabase && window.supabase.createClient) {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    return true;
+                }
+            } catch (e) { console.error(e); }
+            return false;
+        }
+
+        // ========== CRYPTO ==========
         function b64encode(buf) {
-            const bytes = new Uint8Array(buf);
+            const bytes = buf instanceof ArrayBuffer ? new Uint8Array(buf) : new Uint8Array(buf);
             let s = '';
             for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
             return btoa(s);
@@ -1228,86 +1460,31 @@
             for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
             return bytes.buffer;
         }
-
         async function deriveKey(password, saltBuf) {
             const enc = new TextEncoder();
-            const material = await crypto.subtle.importKey(
-                'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
-            );
+            const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
             return crypto.subtle.deriveKey(
                 { name: 'PBKDF2', salt: saltBuf, iterations: 310000, hash: 'SHA-256' },
-                material,
+                baseKey,
                 { name: 'AES-GCM', length: 256 },
                 false,
                 ['encrypt', 'decrypt']
             );
         }
-
         async function encryptPayload(obj, key) {
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            const plain = new TextEncoder().encode(JSON.stringify(obj));
-            const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plain);
-            return { ciphertext: b64encode(cipherBuf), iv: b64encode(iv) };
+            const enc = new TextEncoder();
+            const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(JSON.stringify(obj)));
+            return { ciphertext: b64encode(cipher), iv: b64encode(iv) };
         }
-
-        async function decryptPayload(ciphertextB64, ivB64, key) {
-            const cipherBuf = b64decode(ciphertextB64);
-            const iv = new Uint8Array(b64decode(ivB64));
-            const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBuf);
-            return JSON.parse(new TextDecoder().decode(plainBuf));
-        }
-
-        // ========== APP STATE ==========
-        const realNow = new Date();
-        let appState = {
-            currentTab: 'overview',
-            currentYear: realNow.getFullYear(),
-            currentMonth: realNow.getMonth(),
-            plannerDate: realNow.toISOString().split('T')[0],
-            activeAccount: 'Live',
-            accounts: {},
-            trades: [],
-            planners: {}
-        };
-
-        let filterApplied = false;
-        let byDayCurrentWeekStart = new Date();
-        let weeklyMonthCurrent = { year: realNow.getFullYear(), month: realNow.getMonth() };
-
-        // ========== LOCAL CACHE (encrypted-friendly plain cache only while unlocked) ==========
-        function saveLocalData() {
-            if (!vaultUnlocked) return;
-            try {
-                const payload = getFullStatePayload();
-                localStorage.setItem('jacooodevn_secure_cache_v1', JSON.stringify(payload));
-            } catch (e) {
-                console.error('local cache save error', e);
-            }
-            // Fire-and-forget cloud sync
-            syncEncryptedToCloud();
-        }
-
-        function loadLocalCache() {
-            try {
-                const raw = localStorage.getItem('jacooodevn_secure_cache_v1');
-                if (!raw) return false;
-                const data = JSON.parse(raw);
-                applyStateFromData(data);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        function applyStateFromData(data) {
-            if (!data || typeof data !== 'object') return;
-            appState.trades = Array.isArray(data.trades) ? data.trades : [];
-            appState.planners = data.planners || {};
-            appState.accounts = data.accounts || { 'Live': { name: 'Live Account', balance: 100000 } };
-            appState.activeAccount = data.activeAccount || Object.keys(appState.accounts)[0] || 'Live';
-            if (data.currentYear != null) appState.currentYear = Number(data.currentYear);
-            if (data.currentMonth != null && data.currentMonth !== undefined) appState.currentMonth = Number(data.currentMonth);
-            if (data.plannerDate) appState.plannerDate = data.plannerDate;
+        async function decryptPayload(cipherB64, ivB64, key) {
+            const dec = new TextDecoder();
+            const plain = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: new Uint8Array(b64decode(ivB64)) },
+                key,
+                b64decode(cipherB64)
+            );
+            return JSON.parse(dec.decode(plain));
         }
 
         function getFullStatePayload() {
@@ -1318,247 +1495,231 @@
                 planners: appState.planners,
                 accounts: appState.accounts,
                 activeAccount: appState.activeAccount,
-                currentTab: appState.currentTab,
                 currentYear: appState.currentYear,
                 currentMonth: appState.currentMonth,
                 plannerDate: appState.plannerDate
             };
         }
 
-        // ========== SUPABASE AUTH ==========
-        async function signInWithGoogle() {
-            if (!supabaseClient) {
-                alert('Chưa cấu hình Supabase.\\nMở file HTML, tìm SUPABASE_URL và SUPABASE_ANON_KEY rồi điền Project URL + anon key.');
-                return;
-            }
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: { redirectTo: window.location.href.split('#')[0] }
-            });
-            if (error) alert('Lỗi đăng nhập: ' + error.message);
+        function applyStateFromData(data) {
+            if (!data || typeof data !== 'object') return;
+            appState.trades = Array.isArray(data.trades) ? data.trades.map(normalizeTradeFields) : [];
+            appState.planners = data.planners || {};
+            appState.accounts = data.accounts || { 'Live': { name: 'Live Account', balance: 100000 } };
+            appState.activeAccount = data.activeAccount || Object.keys(appState.accounts)[0] || 'Live';
+            if (data.currentYear != null) appState.currentYear = Number(data.currentYear);
+            if (data.currentMonth != null) appState.currentMonth = Number(data.currentMonth);
+            if (data.plannerDate) appState.plannerDate = data.plannerDate;
         }
 
-        async function handleLogout() {
-            vaultKey = null;
-            vaultUnlocked = false;
-            currentUser = null;
-            appState.trades = [];
-            appState.planners = {};
-            appState.accounts = {};
-            localStorage.removeItem('jacooodevn_secure_cache_v1');
-            if (supabaseClient) await supabaseClient.auth.signOut();
-            updateAuthUI(null);
-            showLockedUI();
+        function saveLocalCache() {
+            try {
+                const slim = getFullStatePayload();
+                // cache without huge images if needed
+                localStorage.setItem('jacooodevn_secure_cache_v1', JSON.stringify(slim));
+            } catch (e) {
+                try {
+                    const slim = getFullStatePayload();
+                    slim.trades = (slim.trades || []).map(t => {
+                        const x = Object.assign({}, t);
+                        x.chartImgs = [];
+                        x.chartImg = '';
+                        return x;
+                    });
+                    localStorage.setItem('jacooodevn_secure_cache_v1', JSON.stringify(slim));
+                } catch (_) {}
+            }
         }
 
-        function updateAuthUI(user) {
-            const out = document.getElementById('authLoggedOut');
-            const inn = document.getElementById('authLoggedIn');
-            if (user) {
-                if (out) out.classList.add('hidden');
-                if (inn) inn.classList.remove('hidden');
-                document.getElementById('userName').innerText = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
-                document.getElementById('userEmail').innerText = user.email || '';
-                const av = document.getElementById('userAvatarContainer');
-                if (user.user_metadata?.avatar_url) {
-                    av.innerHTML = `<img src="${user.user_metadata.avatar_url}" class="w-full h-full rounded-full object-cover">`;
-                } else {
-                    av.innerText = (user.email || 'U').charAt(0).toUpperCase();
-                }
-            } else {
-                if (inn) inn.classList.add('hidden');
-                if (out) out.classList.remove('hidden');
+        function loadLocalCache() {
+            try {
+                const raw = localStorage.getItem('jacooodevn_secure_cache_v1');
+                if (!raw) return false;
+                applyStateFromData(JSON.parse(raw));
+                return true;
+            } catch (_) { return false; }
+        }
+
+        let syncTimer = null;
+        async function syncEncryptedToCloud(force, saltOverride) {
+            if (!vaultUnlocked || !vaultKey || !supabaseClient || !currentUser) return;
+            try {
+                const payload = getFullStatePayload();
+                const { ciphertext, iv } = await encryptPayload(payload, vaultKey);
+                let saltB64 = localStorage.getItem('jacooodevn_vault_salt_' + currentUser.id);
+                if (saltOverride) saltB64 = b64encode(saltOverride);
+                const row = {
+                    user_id: currentUser.id,
+                    ciphertext: ciphertext,
+                    iv: iv,
+                    salt: saltB64,
+                    updated_at: new Date().toISOString()
+                };
+                const { error } = await supabaseClient.from('journal_vault').upsert(row, { onConflict: 'user_id' });
+                if (error) console.warn('cloud sync', error);
+            } catch (e) {
+                console.warn('sync', e);
             }
+        }
+
+        function saveLocalData() {
+            if (!vaultUnlocked) return false;
+            saveLocalCache();
+            clearTimeout(syncTimer);
+            syncTimer = setTimeout(function() { syncEncryptedToCloud(); }, 600);
+            return true;
         }
 
         function showLockedUI() {
-            document.getElementById('loginRequiredBanner')?.classList.remove('hidden');
-            document.getElementById('mainDashboardContent')?.classList.add('hidden');
-            document.getElementById('authDependentControls')?.classList.add('hidden');
+            vaultUnlocked = false;
+            const b = document.getElementById('loginRequiredBanner');
+            const m = document.getElementById('mainDashboardContent');
+            if (b) b.classList.remove('hidden');
+            if (m) m.classList.add('hidden');
             document.getElementById('headerNewTradeBtn')?.classList.add('hidden');
             document.getElementById('headerBatchImportBtn')?.classList.add('hidden');
-            const badge = document.getElementById('vaultStatusBadge');
-            if (badge) badge.innerText = 'Vault khóa';
+            document.getElementById('authDependentControls')?.classList.add('hidden');
+            document.getElementById('authLoggedOut')?.classList.remove('hidden');
+            document.getElementById('authLoggedIn')?.classList.add('hidden');
         }
 
         function showUnlockedUI() {
             document.getElementById('loginRequiredBanner')?.classList.add('hidden');
             document.getElementById('mainDashboardContent')?.classList.remove('hidden');
-            document.getElementById('authDependentControls')?.classList.remove('hidden');
             document.getElementById('headerNewTradeBtn')?.classList.remove('hidden');
             document.getElementById('headerBatchImportBtn')?.classList.remove('hidden');
+            document.getElementById('authDependentControls')?.classList.remove('hidden');
+            document.getElementById('authLoggedOut')?.classList.add('hidden');
+            document.getElementById('authLoggedIn')?.classList.remove('hidden');
             const badge = document.getElementById('vaultStatusBadge');
             if (badge) badge.innerText = 'Vault mở · E2E';
+            if (currentUser) {
+                const email = currentUser.email || '';
+                const el = document.getElementById('userEmail');
+                const nm = document.getElementById('userName');
+                if (el) el.innerText = email;
+                if (nm) nm.innerText = email.split('@')[0] || 'User';
+            }
             updateAccountSelectors();
-            appState.currentTab = 'overview';
-            loadAppState();
-            switchTab('overview', true);
+            if (!didInitialUnlockRender) {
+                didInitialUnlockRender = true;
+                appState.currentTab = 'overview';
+                switchTab('overview', true);
+            } else {
+                switchTab(appState.currentTab || 'overview', true);
+            }
+            if (typeof restoreSidebarSections === 'function') restoreSidebarSections();
         }
 
         function openVaultModal(isSetup) {
             vaultIsSetupMode = !!isSetup;
-            document.getElementById('vaultModal').classList.remove('hidden');
-            document.getElementById('vaultError').classList.add('hidden');
-            document.getElementById('vaultPass1').value = '';
-            document.getElementById('vaultPass2').value = '';
-            document.getElementById('vaultPassUnlock').value = '';
+            const modal = document.getElementById('vaultModal');
+            const title = document.getElementById('vaultModalTitle');
+            const setup = document.getElementById('vaultSetupFields');
+            const unlock = document.getElementById('vaultUnlockFields');
+            const err = document.getElementById('vaultErr');
+            if (err) { err.classList.add('hidden'); err.innerText = ''; }
             if (isSetup) {
-                document.getElementById('vaultModalTitle').innerText = 'TẠO MASTER PASSWORD';
-                document.getElementById('vaultModalSub').innerText = 'Lần đầu sử dụng — tạo mật khẩu mạnh để mã hóa toàn bộ journal.';
-                document.getElementById('vaultSetupExtra').classList.remove('hidden');
-                document.getElementById('vaultUnlockExtra').classList.add('hidden');
-                document.getElementById('vaultConfirmBtn').innerText = 'Tạo Vault & Mã hóa';
+                if (title) title.innerText = 'Create Master Password';
+                setup?.classList.remove('hidden');
+                unlock?.classList.add('hidden');
             } else {
-                document.getElementById('vaultModalTitle').innerText = 'MỞ VAULT BẢO MẬT';
-                document.getElementById('vaultModalSub').innerText = 'Nhập Master Password để giải mã dữ liệu trên máy bạn.';
-                document.getElementById('vaultSetupExtra').classList.add('hidden');
-                document.getElementById('vaultUnlockExtra').classList.remove('hidden');
-                document.getElementById('vaultConfirmBtn').innerText = 'Mở Vault';
-                setTimeout(() => document.getElementById('vaultPassUnlock')?.focus(), 100);
+                if (title) title.innerText = 'Open Vault';
+                setup?.classList.add('hidden');
+                unlock?.classList.remove('hidden');
             }
+            modal?.classList.remove('hidden');
         }
 
         function closeVaultModal() {
-            document.getElementById('vaultModal').classList.add('hidden');
+            document.getElementById('vaultModal')?.classList.add('hidden');
         }
 
-        async function confirmVaultPassword() {
-            const errEl = document.getElementById('vaultError');
-            errEl.classList.add('hidden');
+        async function submitVault() {
+            const err = document.getElementById('vaultErr');
             try {
                 if (vaultIsSetupMode) {
-                    const p1 = document.getElementById('vaultPass1').value;
-                    const p2 = document.getElementById('vaultPass2').value;
-                    if (!p1 || p1.length < 8) throw new Error('Master Password tối thiểu 8 ký tự');
-                    if (p1 !== p2) throw new Error('Hai mật khẩu không khớp');
+                    const p1 = document.getElementById('vaultPassSetup').value;
+                    const p2 = document.getElementById('vaultPassSetup2').value;
+                    if (!p1 || p1.length < 6) throw new Error('Password min 6 characters');
+                    if (p1 !== p2) throw new Error('Passwords do not match');
                     const salt = crypto.getRandomValues(new Uint8Array(16));
                     vaultKey = await deriveKey(p1, salt);
-                    // init empty state if needed
-                    if (!appState.accounts || Object.keys(appState.accounts).length === 0) {
+                    vaultUnlocked = true;
+                    markVaultSession();
+                    localStorage.setItem('jacooodevn_vault_salt_' + currentUser.id, b64encode(salt));
+                    if (!appState.accounts || !Object.keys(appState.accounts).length) {
                         appState.accounts = { 'Live': { name: 'Live Account', balance: 100000 } };
                         appState.activeAccount = 'Live';
-                        appState.trades = [];
-                        appState.planners = {};
                     }
-                    vaultUnlocked = true;
-                    // store salt locally tied to user (salt is not secret)
-                    localStorage.setItem('jacooodevn_vault_salt_' + (currentUser?.id || 'local'), b64encode(salt));
+                    saveLocalCache();
                     await syncEncryptedToCloud(true, salt);
                     closeVaultModal();
                     showUnlockedUI();
                 } else {
                     const pw = document.getElementById('vaultPassUnlock').value;
-                    if (!pw) throw new Error('Vui lòng nhập Master Password');
-                    await unlockWithPassword(pw);
-                }
-            } catch (e) {
-                errEl.innerText = e.message || String(e);
-                errEl.classList.remove('hidden');
-            }
-        }
-
-        async function unlockWithPassword(password) {
-            // Try cloud first, then local salt
-            let row = null;
-            if (supabaseClient && currentUser) {
-                const { data, error } = await supabaseClient
-                    .from('journal_vault')
-                    .select('ciphertext, iv, salt, updated_at')
-                    .eq('user_id', currentUser.id)
-                    .maybeSingle();
-                if (error) console.warn('vault fetch', error);
-                row = data;
-            }
-
-            let saltB64 = row?.salt || localStorage.getItem('jacooodevn_vault_salt_' + (currentUser?.id || 'local'));
-            if (!saltB64) {
-                // No vault yet → setup mode
-                openVaultModal(true);
-                return;
-            }
-            const saltBuf = b64decode(saltB64);
-            const key = await deriveKey(password, saltBuf);
-
-            if (row?.ciphertext && row?.iv) {
-                try {
-                    const data = await decryptPayload(row.ciphertext, row.iv, key);
-                    applyStateFromData(data);
+                    if (!pw) throw new Error('Enter Master Password');
+                    let row = null;
+                    if (supabaseClient && currentUser) {
+                        const res = await supabaseClient.from('journal_vault').select('ciphertext, iv, salt').eq('user_id', currentUser.id).maybeSingle();
+                        row = res.data;
+                    }
+                    const saltB64 = (row && row.salt) || localStorage.getItem('jacooodevn_vault_salt_' + currentUser.id);
+                    if (!saltB64) {
+                        openVaultModal(true);
+                        return;
+                    }
+                    const key = await deriveKey(pw, b64decode(saltB64));
+                    if (row && row.ciphertext && row.iv) {
+                        try {
+                            const data = await decryptPayload(row.ciphertext, row.iv, key);
+                            applyStateFromData(data);
+                        } catch (e) {
+                            throw new Error('Wrong Master Password');
+                        }
+                    } else {
+                        loadLocalCache();
+                    }
                     vaultKey = key;
                     vaultUnlocked = true;
+                    markVaultSession();
                     localStorage.setItem('jacooodevn_vault_salt_' + currentUser.id, saltB64);
-                    saveLocalData(); // refresh cache
+                    saveLocalCache();
                     closeVaultModal();
                     showUnlockedUI();
-                    return;
-                } catch (e) {
-                    throw new Error('Sai Master Password hoặc dữ liệu hỏng');
                 }
-            }
-
-            // Cloud empty but salt exists — try local cache after verifying password by encrypting a probe
-            // If only salt locally and cache exists, accept key and load cache
-            vaultKey = key;
-            vaultUnlocked = true;
-            loadLocalCache();
-            if (!appState.accounts || Object.keys(appState.accounts).length === 0) {
-                appState.accounts = { 'Live': { name: 'Live Account', balance: 100000 } };
-                appState.activeAccount = 'Live';
-            }
-            await syncEncryptedToCloud(true, new Uint8Array(saltBuf));
-            closeVaultModal();
-            showUnlockedUI();
-        }
-
-        let syncTimer = null;
-        async function syncEncryptedToCloud(force = false, saltOverride = null) {
-            if (!vaultUnlocked || !vaultKey || !supabaseClient || !currentUser) return;
-            if (syncTimer && !force) return;
-            const doSync = async () => {
-                try {
-                    let saltB64 = localStorage.getItem('jacooodevn_vault_salt_' + currentUser.id);
-                    if (saltOverride) {
-                        saltB64 = b64encode(saltOverride);
-                        localStorage.setItem('jacooodevn_vault_salt_' + currentUser.id, saltB64);
-                    }
-                    if (!saltB64) return;
-                    const { ciphertext, iv } = await encryptPayload(getFullStatePayload(), vaultKey);
-                    const { error } = await supabaseClient.from('journal_vault').upsert({
-                        user_id: currentUser.id,
-                        ciphertext,
-                        iv,
-                        salt: saltB64,
-                        updated_at: new Date().toISOString()
-                    }, { onConflict: 'user_id' });
-                    if (error) console.error('cloud sync error', error);
-                } catch (e) {
-                    console.error('encrypt/sync', e);
+            } catch (e) {
+                if (err) {
+                    err.innerText = e.message || String(e);
+                    err.classList.remove('hidden');
+                } else {
+                    alert(e.message || String(e));
                 }
-            };
-            if (force) {
-                await doSync();
-            } else {
-                clearTimeout(syncTimer);
-                syncTimer = setTimeout(() => { syncTimer = null; doSync(); }, 800);
             }
         }
 
         async function onAuthReady(session) {
-            currentUser = session?.user || null;
-            updateAuthUI(currentUser);
+            currentUser = session && session.user ? session.user : null;
             if (!currentUser) {
                 showLockedUI();
                 return;
             }
-            // Check if vault exists
-            let hasVault = false;
-            if (supabaseClient) {
-                const { data } = await supabaseClient
-                    .from('journal_vault')
-                    .select('user_id')
-                    .eq('user_id', currentUser.id)
-                    .maybeSingle();
-                hasVault = !!data;
+            document.getElementById('authLoggedOut')?.classList.add('hidden');
+            document.getElementById('authLoggedIn')?.classList.remove('hidden');
+            if (vaultUnlocked && vaultKey) {
+                showUnlockedUI();
+                return;
             }
+            if (typeof isVaultSessionValid === 'function' && isVaultSessionValid() && loadLocalCache()) {
+                vaultUnlocked = true;
+                showUnlockedUI();
+                return;
+            }
+            let hasVault = false;
+            try {
+                const res = await supabaseClient.from('journal_vault').select('user_id').eq('user_id', currentUser.id).maybeSingle();
+                hasVault = !!(res && res.data);
+            } catch (_) {}
             if (!hasVault && !localStorage.getItem('jacooodevn_vault_salt_' + currentUser.id)) {
                 openVaultModal(true);
             } else {
@@ -1566,10 +1727,92 @@
             }
         }
 
-        // ========== BACKUP (plaintext export still available when unlocked) ==========
+        function showAuthMsg(msg) {
+            const el = document.getElementById('authMsg');
+            if (!el) { alert(msg); return; }
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        
+        async function signInWithGoogle() {
+            if (!supabaseClient) initSupabase();
+            if (!supabaseClient) {
+                showAuthMsg('Supabase chua load. Kiem tra mang.');
+                return;
+            }
+            if (location.protocol === 'file:') {
+                showAuthMsg('Google khong chay voi file:// — hay host Netlify/localhost, hoac dung Email ben duoi.');
+                alert('Google login can HTTPS hoac localhost.\\n\\nCach 1: Host file len Netlify (keo tha HTML)\\nCach 2: Dung Sign in Email\\nCach 3: Mo bang Live Server (localhost)');
+                return;
+            }
+            const redirectTo = window.location.href.split('#')[0];
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: redirectTo }
+            });
+            if (error) {
+                showAuthMsg('Google loi: ' + error.message);
+                alert('Google login error: ' + error.message);
+            }
+        }
+
+        async function signInWithEmail() {
+            if (!supabaseClient) initSupabase();
+            if (!supabaseClient) {
+                showAuthMsg('Supabase SDK not loaded. Check internet connection.');
+                return;
+            }
+            const email = ((document.getElementById('emailAuthEmail') && document.getElementById('emailAuthEmail').value) || '').trim();
+            const password = (document.getElementById('emailAuthPass') && document.getElementById('emailAuthPass').value) || '';
+            if (!email || !password) {
+                showAuthMsg('Enter email and password');
+                return;
+            }
+            const { error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+            if (error) showAuthMsg('Sign in failed: ' + error.message);
+        }
+
+        async function signUpWithEmail() {
+            if (!supabaseClient) initSupabase();
+            if (!supabaseClient) {
+                showAuthMsg('Supabase SDK not loaded. Check internet.');
+                return;
+            }
+            const email = ((document.getElementById('emailAuthEmail') && document.getElementById('emailAuthEmail').value) || '').trim();
+            const password = (document.getElementById('emailAuthPass') && document.getElementById('emailAuthPass').value) || '';
+            if (!email || !password) {
+                showAuthMsg('Enter email and password');
+                return;
+            }
+            if (password.length < 6) {
+                showAuthMsg('Password min 6 characters');
+                return;
+            }
+            const { data, error } = await supabaseClient.auth.signUp({ email: email, password: password });
+            if (error) {
+                showAuthMsg('Sign up failed: ' + error.message);
+                return;
+            }
+            if (data && data.user && !data.session) {
+                showAuthMsg('Sign up OK. Disable Confirm email in Supabase, then Sign in.');
+            } else {
+                showAuthMsg('Sign up OK. Create Master Password next.');
+            }
+        }
+
+        async function handleLogout() {
+            vaultKey = null;
+            vaultUnlocked = false;
+            currentUser = null;
+            didInitialUnlockRender = false;
+            if (supabaseClient) await supabaseClient.auth.signOut();
+            showLockedUI();
+        }
+
+                // ========== BACKUP (plaintext export still available when unlocked) ==========
         // ===== HARD-DISK BACKUP (JSON file on real disk) =====
         function exportFullBackup() {
-            if (!vaultUnlocked) { alert("Hãy mở Vault trước"); return; }
             try {
                 const payload = getFullStatePayload();
                 const json = JSON.stringify(payload, null, 2);
@@ -1607,19 +1850,42 @@
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (!data || typeof data !== 'object') throw new Error('File không hợp lệ');
-                    appState.trades = Array.isArray(data.trades) ? data.trades : [];
+                    if (!data || typeof data !== 'object') throw new Error('Invalid backup file');
+                    let trades = Array.isArray(data.trades) ? data.trades : [];
+                    const rawSize = (e.target.result || '').length;
+                    if (rawSize > 2500000) {
+                        const strip = confirm('Backup is very large (' + Math.round(rawSize/1024/1024*10)/10 + ' MB).\n\nOK = import WITHOUT chart images (recommended)\nCancel = try full import');
+                        if (strip) {
+                            trades = trades.map(t => {
+                                const x = Object.assign({}, t);
+                                x.chartImgs = [];
+                                x.chartImg = '';
+                                return x;
+                            });
+                        }
+                    } else {
+                        // still strip images if many base64 present to avoid quota
+                        const hasBigImgs = trades.some(t => (t.chartImgs && t.chartImgs.join('').length > 500000) || (t.chartImg && t.chartImg.length > 200000));
+                        if (hasBigImgs) {
+                            trades = trades.map(t => {
+                                const x = Object.assign({}, t);
+                                x.chartImgs = [];
+                                x.chartImg = '';
+                                return x;
+                            });
+                        }
+                    }
+                    appState.trades = (trades || []).map(normalizeTradeFields);
                     appState.planners = data.planners || {};
                     appState.accounts = data.accounts || { 'Live': { name: 'Live Account', balance: 100000 } };
                     appState.activeAccount = data.activeAccount || Object.keys(appState.accounts)[0] || 'Live';
                     if (data.currentYear != null) appState.currentYear = Number(data.currentYear);
                     if (data.currentMonth != null && data.currentMonth !== undefined) appState.currentMonth = Number(data.currentMonth);
                     if (data.plannerDate) appState.plannerDate = data.plannerDate;
-                    if (data.currentTab) appState.currentTab = data.currentTab;
                     saveLocalData();
                     updateAccountSelectors();
                     switchTab('overview', true);
-                    alert('Đã khôi phục thành công từ file backup!\nSố lệnh: ' + appState.trades.length);
+                    alert('Backup restored. Trades: ' + appState.trades.length);
                 } catch (err) {
                     console.error(err);
                     alert('Không đọc được file backup: ' + err.message);
@@ -1646,12 +1912,12 @@
         }
 
         function loadAppState() {
-            const todayStr = realNow.toISOString().split('T')[0];
+            const todayStr = toLocalISODate(realNow);
             if (!document.getElementById('filterDateFrom').value) {
                 document.getElementById('filterDateFrom').value = `${appState.currentYear}-${String(appState.currentMonth+1).padStart(2,'0')}-01`;
             }
             if (!document.getElementById('filterDateTo').value) {
-                const lastDay = new Date(appState.currentYear, appState.currentMonth + 1, 0).toISOString().split('T')[0];
+                const lastDay = toLocalISODate(new Date(appState.currentYear, appState.currentMonth + 1, 0));
                 document.getElementById('filterDateTo').value = lastDay;
             }
             document.getElementById('modalDate').value = todayStr;
@@ -1694,8 +1960,67 @@
             }
         }
 
+
+        function toggleSidebarCollapse() {
+            const sb = document.getElementById('appSidebar');
+            const icon = document.getElementById('sidebarCollapseIcon');
+            if (!sb) return;
+            const collapsed = sb.getAttribute('data-collapsed') === 'true';
+            const next = !collapsed;
+            sb.setAttribute('data-collapsed', next ? 'true' : 'false');
+            if (next) {
+                sb.classList.remove('w-64');
+                sb.classList.add('w-[72px]');
+                sb.querySelectorAll('.sidebar-label').forEach(el => el.classList.add('hidden'));
+                sb.querySelectorAll('.sidebar-section-dot').forEach(el => el.classList.remove('hidden'));
+                sb.querySelectorAll('.sidebar-nav-btn').forEach(el => {
+                    el.classList.remove('gap-3', 'px-3');
+                    el.classList.add('justify-center', 'px-0');
+                });
+                if (icon) {
+                    icon.classList.remove('fa-chevron-left');
+                    icon.classList.add('fa-chevron-right');
+                }
+            } else {
+                sb.classList.add('w-64');
+                sb.classList.remove('w-[72px]');
+                sb.querySelectorAll('.sidebar-label').forEach(el => el.classList.remove('hidden'));
+                sb.querySelectorAll('.sidebar-section-dot').forEach(el => el.classList.add('hidden'));
+                sb.querySelectorAll('.sidebar-nav-btn').forEach(el => {
+                    el.classList.add('gap-3', 'px-3');
+                    el.classList.remove('justify-center', 'px-0');
+                });
+                if (icon) {
+                    icon.classList.add('fa-chevron-left');
+                    icon.classList.remove('fa-chevron-right');
+                }
+            }
+            try { localStorage.setItem('jacooodevn_sidebar_collapsed', next ? '1' : '0'); } catch(_) {}
+        }
+        function restoreSidebarSections() {
+            try {
+                if (localStorage.getItem('jacooodevn_sidebar_collapsed') === '1') {
+                    const sb = document.getElementById('appSidebar');
+                    if (sb && sb.getAttribute('data-collapsed') !== 'true') {
+                        toggleSidebarCollapse();
+                    }
+                }
+            } catch(_) {}
+        }
+
         function switchTab(tabId, isSilent = false) {
+            if (typeof PRO_TABS !== 'undefined' && PRO_TABS.includes(tabId) && typeof isPro === 'function' && !isPro()) {
+                showUpgradeModal('Tab: ' + tabId);
+                return;
+            }
+
             appState.currentTab = tabId;
+            if (!isSilent && vaultUnlocked) {
+                try {
+                    // nhớ tab trong session (không ảnh hưởng F5 → overview)
+                    sessionStorage.setItem('jacooodevn_last_tab', tabId);
+                } catch(_) {}
+            }
             
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const targetTab = document.getElementById(`tab-${tabId}`);
@@ -1739,11 +2064,11 @@
                         fees: '30s',
                         pnl: 1161.6,
                         returnPct: 1.16,
-                        setup: 'Reversal',
+                        setup: 'ob',
                         lossReason: '',
-                        winReason: 'correct bias',
+                        winReason: 'clean_setup',
                         holdMgmt: 'hold_to_tp',
-                        emotionalState: 'Confident',
+                        emotionalState: 'confident',
                         confluences: ['SMT', 'iFVG'],
                         notes: 'Lệnh mẫu demo local...',
                         duration: '30s',
@@ -1768,6 +2093,53 @@
 
         let chartInstances = {};
 
+        function getHourColorClass(hour) {
+            if (!hour) return 'bg-slate-50 text-slate-600 border border-slate-200';
+            const h = formatHourLabel(hour);
+            // Nền nhạt + chữ tối, mỗi khung một hue khác hẳn (dễ đọc)
+            const map = {
+                '09:30-09:40': 'bg-blue-50 text-blue-700 border border-blue-200',
+                '09:40-09:50': 'bg-sky-50 text-sky-700 border border-sky-200',
+                '09:50-10:10': 'bg-cyan-50 text-cyan-800 border border-cyan-200',
+                '10:10-10:20': 'bg-teal-50 text-teal-800 border border-teal-200',
+                '10:20-10:30': 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+                '10:30-10:40': 'bg-green-50 text-green-800 border border-green-200',
+                '10:40-10:50': 'bg-lime-50 text-lime-800 border border-lime-200',
+                '10:50-11:10': 'bg-yellow-50 text-yellow-800 border border-yellow-200',
+                '11:10-11:20': 'bg-amber-50 text-amber-800 border border-amber-200',
+                '11:20-11:30': 'bg-orange-50 text-orange-800 border border-orange-200',
+                '11:30-11:40': 'bg-red-50 text-red-700 border border-red-200',
+                '11:40-11:50': 'bg-rose-50 text-rose-700 border border-rose-200',
+                '11:50-12:10': 'bg-pink-50 text-pink-700 border border-pink-200',
+                '12:10-12:20': 'bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-200',
+                '12:20-12:30': 'bg-purple-50 text-purple-800 border border-purple-200',
+                '12:30-12:40': 'bg-violet-50 text-violet-800 border border-violet-200',
+                '12:40-12:50': 'bg-indigo-50 text-indigo-800 border border-indigo-200',
+                '12:50-01:00': 'bg-slate-100 text-slate-700 border border-slate-300',
+                '01:00-01:10': 'bg-stone-100 text-stone-700 border border-stone-300',
+                '01:10-01:40': 'bg-zinc-100 text-zinc-700 border border-zinc-300',
+                '01:40-01:50': 'bg-neutral-100 text-neutral-700 border border-neutral-300',
+                '01:50-02:00': 'bg-gray-100 text-gray-700 border border-gray-300'
+            };
+            return map[h] || 'bg-slate-50 text-slate-700 border border-slate-200';
+        }
+        function formatHourLabel(hour) {
+            if (!hour) return '--';
+            return String(hour).replace(/\s*\((AM )?Macro\)/gi, '').trim();
+        }
+
+        function toLocalISODate(d) {
+            if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return new Date(NaN);
+            if (dateStr instanceof Date) return dateStr;
+            const s = String(dateStr).slice(0, 10);
+            const p = s.split('-').map(Number);
+            if (p.length >= 3 && p[0] > 1900) return new Date(p[0], p[1] - 1, p[2]);
+            return new Date(dateStr);
+        }
         function formatPnlString(amount) {
             const num = Number(amount) || 0;
             const absVal = Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -1776,15 +2148,103 @@
             return `+$0`;
         }
 
+        
+        function fillSelectOptions(elId, values, allLabel) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const cur = el.value || 'all';
+            const uniq = [...new Set(values.filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b)));
+            el.innerHTML = '<option value="all">' + allLabel + '</option>' + uniq.map(v => '<option value="' + String(v).replace(/"/g,'&quot;') + '">' + v + '</option>').join('');
+            if ([...el.options].some(o => o.value === cur)) el.value = cur; else el.value = 'all';
+        }
+
+        function refreshSymbolFilterOptions() {
+            const trades = appState.trades || [];
+            if (typeof fillSelectOptions !== 'function') return;
+            fillSelectOptions('filterSymbol', trades.map(t => (t.symbol || '').toUpperCase()), 'All Symbol');
+            const hourOpts = ['09:30-09:40','09:40-09:50','09:50-10:10','10:10-10:20','10:20-10:30','10:30-10:40','10:40-10:50','10:50-11:10','11:10-11:20','11:20-11:30','11:30-11:40','11:40-11:50','11:50-12:10','12:10-12:20','12:20-12:30','12:30-12:40','12:40-12:50','12:50-13:10','13:10-13:20','13:20-13:30','13:30-13:40','13:40-13:50','13:50-14:10','14:10-14:20','14:20-14:30','14:30-14:40','14:40-14:50','14:50-15:10','15:10-15:20','15:20-15:30','15:30-15:40','15:40-15:50','15:50-16:00'];
+            const dataHours = trades.map(t => {
+                let h = t.hour || '';
+                if (typeof formatHourLabel === 'function') h = formatHourLabel(t.hour);
+                return String(h).replace(/\s*\((AM\s*)?Macro\)/gi, '').trim();
+            }).filter(Boolean);
+            fillSelectOptions('filterHour', [...new Set(hourOpts.concat(dataHours))], 'All Hour');
+            const lossOpts = ['wrong_bias','no_confirmation','early_entry','late_entry','counter_trend','bad_sl','sl_too_tight','overrisk','revenge_trade','fomo','overtrade','news_volatility'];
+            fillSelectOptions('filterLossReason', [...new Set(lossOpts.concat(trades.map(t => t.lossReason).filter(Boolean)))], 'All Loss');
+            const winOpts = ['correct_bias','htf_alignment','clean_setup','good_entry','liquidity_taken','strong_momentum','rr_respected','patient_hold','session_timing'];
+            fillSelectOptions('filterWinReason', [...new Set(winOpts.concat(trades.map(t => t.winReason).filter(Boolean)))], 'All Win');
+            const holdOpts = ['hold_to_tp','hold_runner','early_exit','fear_close','greed_hold','move_sl_be','move_sl_lock','move_sl_bad','overmanage','no_management'];
+            fillSelectOptions('filterHold', [...new Set(holdOpts.concat(trades.map(t => t.holdMgmt).filter(Boolean)))], 'All Hold');
+            const emoOpts = ['calm','confident','focused','neutral','fomo','fear','greedy','revenge','impatient','tilted'];
+            fillSelectOptions('filterEmotion', [...new Set(emoOpts.concat(trades.map(t => t.emotionalState).filter(Boolean)))], 'All Emotion');
+            const confStatic = ['OB','FVG','BPR','CISD','MSS','SMT','iFVG','Liquidity'];
+            const confs = [];
+            trades.forEach(t => { if (Array.isArray(t.confluences)) confs.push(...t.confluences); });
+            fillSelectOptions('filterConfluence', [...new Set(confStatic.concat(confs))], 'All Conf');
+        }
+
+        function updateModalRR() {
+            const pnl = Number(document.getElementById('modalPnl')?.value);
+            const risk = Number(document.getElementById('modalRisk')?.value);
+            const el = document.getElementById('modalRRPreview');
+            if (!el) return;
+            if (!risk || risk <= 0 || isNaN(pnl)) { el.innerText = '--'; return; }
+            const rr = pnl / risk;
+            el.innerText = rr.toFixed(2) + 'R';
+            el.className = 'font-bold ' + (rr > 0 ? 'text-emerald-600' : (rr < 0 ? 'text-rose-600' : 'text-slate-600'));
+        }
+        function calcTradeRR(t) {
+            if (!t) return null;
+            const risk = Number(t.risk);
+            const pnl = Number(t.pnl);
+            if (!risk || risk <= 0 || isNaN(pnl)) return null;
+            return pnl / risk;
+        }
+
         function getFilteredTrades() {
             const accFilter = document.getElementById('filterAccount')?.value || 'all';
             const setupFilter = document.getElementById('filterSetup')?.value || 'all';
+            const resultFilter = document.getElementById('filterResult')?.value || 'all';
+            const symbolFilter = document.getElementById('filterSymbol')?.value || 'all';
+            const rrFilter = document.getElementById('filterRR')?.value || 'all';
+            const typeFilter = document.getElementById('filterType')?.value || 'all';
+            const hourFilter = document.getElementById('filterHour')?.value || 'all';
+            const lossFilter = document.getElementById('filterLossReason')?.value || 'all';
+            const winFilter = document.getElementById('filterWinReason')?.value || 'all';
+            const holdFilter = document.getElementById('filterHold')?.value || 'all';
+            const emoFilter = document.getElementById('filterEmotion')?.value || 'all';
+            const confFilter = document.getElementById('filterConfluence')?.value || 'all';
             const dateFrom = document.getElementById('filterDateFrom')?.value;
             const dateTo = document.getElementById('filterDateTo')?.value;
 
             return appState.trades.filter(t => {
                 if (accFilter !== 'all' && t.account !== accFilter) return false;
                 if (setupFilter !== 'all' && t.setup !== setupFilter) return false;
+                if (symbolFilter !== 'all' && String(t.symbol || '').toUpperCase() !== symbolFilter) return false;
+                if (typeFilter !== 'all' && String(t.type || '').toUpperCase() !== typeFilter) return false;
+                let hourKey = (t.hour || '');
+                if (typeof formatHourLabel === 'function') hourKey = formatHourLabel(t.hour);
+                hourKey = String(hourKey).replace(/\s*\((AM\s*)?Macro\)/gi, '').trim();
+                if (hourFilter !== 'all' && hourKey !== hourFilter) return false;
+                if (lossFilter !== 'all' && (t.lossReason || '') !== lossFilter) return false;
+                if (winFilter !== 'all' && (t.winReason || '') !== winFilter) return false;
+                if (holdFilter !== 'all' && (t.holdMgmt || '') !== holdFilter) return false;
+                if (emoFilter !== 'all' && (t.emotionalState || '') !== emoFilter) return false;
+                if (confFilter !== 'all') {
+                    const confs = Array.isArray(t.confluences) ? t.confluences : [];
+                    if (!confs.includes(confFilter)) return false;
+                }
+                const pnl = Number(t.pnl) || 0;
+                if (resultFilter === 'win' && !(pnl > 0)) return false;
+                if (resultFilter === 'loss' && !(pnl < 0)) return false;
+                if (resultFilter === 'be' && pnl !== 0) return false;
+                const ret = Number(t.returnPct);
+                const retVal = isNaN(ret) ? null : ret;
+                if (rrFilter === 'pos' && !(retVal > 0)) return false;
+                if (rrFilter === 'neg' && !(retVal < 0)) return false;
+                if (rrFilter === 'ge1' && !(retVal >= 1)) return false;
+                if (rrFilter === 'ge2' && !(retVal >= 2)) return false;
+                if (rrFilter === 'le-1' && !(retVal <= -1)) return false;
                 if (filterApplied && dateFrom && t.date < dateFrom) return false;
                 if (filterApplied && dateTo && t.date > dateTo) return false;
                 return true;
@@ -1952,14 +2412,34 @@
             document.getElementById('stat-total-pts').innerText = `${totalPoints.toFixed(1)} pts`;
 
             renderAdvancedSystemAnalytics(filteredTrades);
+            if (typeof renderRRStats === "function") renderRRStats(filteredTrades);
             renderCumulativeChart();
             renderWinRateGauge(winRateVal, winTrades, lossTrades);
             renderAdvancedCards(filteredTrades, netProfit, winTrades, lossTrades, totalTrades, accBalance);
         }
 
+        function renderRRStats(trades) {
+            const rrList = (trades || []).map(t => calcTradeRR(t)).filter(v => v !== null && !isNaN(v));
+            const riskList = (trades || []).map(t => Number(t.risk)).filter(v => v > 0 && !isNaN(v));
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+            if (!rrList.length) { set('rrAvg','N/A'); set('rrMax','N/A'); set('rrMin','N/A'); }
+            else {
+                set('rrAvg', (rrList.reduce((a,b)=>a+b,0)/rrList.length).toFixed(2)+'R');
+                set('rrMax', Math.max(...rrList).toFixed(2)+'R');
+                set('rrMin', Math.min(...rrList).toFixed(2)+'R');
+            }
+            if (!riskList.length) { set('riskAvg','N/A'); set('riskMax','N/A'); set('riskMin','N/A'); }
+            else {
+                set('riskAvg', '$'+Math.round(riskList.reduce((a,b)=>a+b,0)/riskList.length));
+                set('riskMax', '$'+Math.round(Math.max(...riskList)));
+                set('riskMin', '$'+Math.round(Math.min(...riskList)));
+            }
+        }
+
         function renderAdvancedSystemAnalytics(trades) {
             const emotionCounts = {};
             const errorCounts = {};
+            const holdCounts = {};
             const indicatorWins = {};
             const indicatorTotals = {};
 
@@ -1967,26 +2447,21 @@
                 if (t.emotionalState) {
                     emotionCounts[t.emotionalState] = (emotionCounts[t.emotionalState] || 0) + 1;
                 }
+                if (t.holdMgmt) {
+                    holdCounts[t.holdMgmt] = (holdCounts[t.holdMgmt] || 0) + 1;
+                }
                 const err = t.lossReason;
                 if (err) {
                     errorCounts[err] = (errorCounts[err] || 0) + 1;
                 }
-                const isWin = Number(t.pnl) > 0;
-                const factors = [];
-                if (t.setup) factors.push(`Setup: ${t.setup}`);
-                if (t.winReason) factors.push(`WinReason: ${t.winReason}`);
-                if (t.holdMgmt) factors.push(`HoldMgmt: ${t.holdMgmt}`);
-                if (Array.isArray(t.confluences)) {
-                    t.confluences.forEach(c => factors.push(`Confluence: ${c}`));
-                }
-                factors.push(`Timeframe: ${t.fees || '1m'}`);
-
-                factors.forEach(f => {
+                // Chỉ thống kê theo Win Reason
+                if (t.winReason) {
+                    const f = t.winReason;
                     indicatorTotals[f] = (indicatorTotals[f] || 0) + 1;
-                    if (isWin) {
+                    if (Number(t.pnl) > 0) {
                         indicatorWins[f] = (indicatorWins[f] || 0) + 1;
                     }
-                });
+                }
             });
 
             // Top 5 Emotions
@@ -2017,6 +2492,24 @@
                 errContainer.innerHTML = `<div class="text-slate-400 italic">Chưa có dữ liệu lỗi</div>`;
             }
 
+            // Top 5 Hold Management
+            const sortedHold = Object.entries(holdCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const holdContainer = document.getElementById('topHoldContainer');
+            /* hold */
+            if (holdContainer) {
+                if (sortedHold.length > 0) {
+                    holdContainer.innerHTML = sortedHold.map(([h, count], i) => `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border border-slate-200">
+                        <span class="font-bold text-slate-700">#${i+1} ${h}</span>
+                        <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold">${count} lần</span>
+                    </div>
+                    `).join('');
+                } else {
+                    holdContainer.innerHTML = '<div class="text-slate-400 italic">Chưa có dữ liệu hold</div>';
+                }
+
+            }
+
             // Top 5 Winrate Metrics
             const metricWinRates = Object.keys(indicatorTotals).map(metric => {
                 const total = indicatorTotals[metric];
@@ -2034,7 +2527,7 @@
                     </div>
                 `).join('');
             } else {
-                metricContainer.innerHTML = `<div class="text-slate-400 italic">Chưa đủ dữ liệu winrate</div>`;
+                metricContainer.innerHTML = `<div class="text-slate-400 italic">Chưa đủ dữ liệu Win Reason</div>`;
             }
         }
 
@@ -2164,18 +2657,98 @@
             document.getElementById('cardExpWinRate').innerText = totalTrades > 0 ? (winRate*100).toFixed(0) + '%' : '0%';
             document.getElementById('cardExpAvgWin').innerText = `+$${avgWin.toFixed(0)}`;
 
-            if (totalTrades > 0) {
-                document.getElementById('cardTopSymbolContainer').innerHTML = `<div class="flex justify-between font-bold text-slate-800"><span>NQ</span><span class="${netProfit>=0?'text-emerald-600':'text-rose-600'}">${formatPnlString(netProfit)}</span></div><div class="text-[11px] text-slate-500">${totalTrades} lệnh | ${(winRate*100).toFixed(0)}% wr</div>`;
-                document.getElementById('cardTopSetupContainer').innerHTML = `<div class="flex justify-between font-bold text-slate-800"><span>REVERSAL</span><span class="${netProfit>=0?'text-emerald-600':'text-rose-600'}">${formatPnlString(netProfit)}</span></div><div class="text-[11px] text-slate-500">${totalTrades} lệnh | ${(winRate*100).toFixed(0)}% wr</div>`;
-                document.getElementById('cardTopTagContainer').innerHTML = `<div class="flex justify-between font-bold text-slate-800"><span>METRIC</span><span class="${netProfit>=0?'text-emerald-600':'text-rose-600'}">${formatPnlString(netProfit)}</span></div><div class="text-[11px] text-slate-500">${totalTrades} lệnh | ${(winRate*100).toFixed(0)}% wr</div>`;
+                        // TOP SYMBOL by net PnL
+            const symbolStats = {};
+            filteredTrades.forEach(t => {
+                const sym = (t.symbol || 'UNKNOWN').toUpperCase();
+                if (!symbolStats[sym]) symbolStats[sym] = { pnl: 0, count: 0, wins: 0 };
+                symbolStats[sym].pnl += Number(t.pnl) || 0;
+                symbolStats[sym].count += 1;
+                if (Number(t.pnl) > 0) symbolStats[sym].wins += 1;
+            });
+            const sortedSyms = Object.entries(symbolStats).sort((a,b) => b[1].pnl - a[1].pnl);
+            if (sortedSyms.length > 0) {
+                const [topSym, st] = sortedSyms[0];
+                const wr = st.count ? (st.wins / st.count * 100).toFixed(0) : 0;
+                document.getElementById('cardTopSymbolContainer').innerHTML =
+                    '<div class="flex justify-between font-bold text-slate-800"><span>' + topSym + '</span><span class="' + (st.pnl>=0?'text-emerald-600':'text-rose-600') + '">' + formatPnlString(st.pnl) + '</span></div>' +
+                    '<div class="text-[11px] text-slate-500">' + st.count + ' lenh | ' + wr + '% wr</div>';
+            } else {
+                document.getElementById('cardTopSymbolContainer').innerHTML =
+                    '<div class="flex justify-between font-bold text-slate-800"><span>--</span><span class="text-slate-400">$0</span></div><div class="text-[11px] text-slate-500">0 lenh</div>';
             }
+
+            // TOP SETUP by net PnL
+            const setupStats = {};
+            filteredTrades.forEach(t => {
+                const s = t.setup || 'None';
+                if (!setupStats[s]) setupStats[s] = { pnl: 0, count: 0, wins: 0 };
+                setupStats[s].pnl += Number(t.pnl) || 0;
+                setupStats[s].count += 1;
+                if (Number(t.pnl) > 0) setupStats[s].wins += 1;
+            });
+            const sortedSetups = Object.entries(setupStats).sort((a,b) => b[1].pnl - a[1].pnl);
+            if (sortedSetups.length > 0) {
+                const [topSetup, st] = sortedSetups[0];
+                const wr = st.count ? (st.wins / st.count * 100).toFixed(0) : 0;
+                document.getElementById('cardTopSetupContainer').innerHTML =
+                    '<div class="flex justify-between font-bold text-slate-800"><span>' + topSetup + '</span><span class="' + (st.pnl>=0?'text-emerald-600':'text-rose-600') + '">' + formatPnlString(st.pnl) + '</span></div>' +
+                    '<div class="text-[11px] text-slate-500">' + st.count + ' lenh | ' + wr + '% wr</div>';
+            }
+
+            // TOP METRIC = best Win Reason by PnL (fallback setup)
+            const metricStats = {};
+            filteredTrades.forEach(t => {
+                const m = t.winReason || t.setup || null;
+                if (!m) return;
+                if (!metricStats[m]) metricStats[m] = { pnl: 0, count: 0, wins: 0 };
+                metricStats[m].pnl += Number(t.pnl) || 0;
+                metricStats[m].count += 1;
+                if (Number(t.pnl) > 0) metricStats[m].wins += 1;
+            });
+            const sortedMetrics = Object.entries(metricStats).sort((a,b) => b[1].pnl - a[1].pnl);
+            if (sortedMetrics.length > 0) {
+                const [topM, st] = sortedMetrics[0];
+                const wr = st.count ? (st.wins / st.count * 100).toFixed(0) : 0;
+                document.getElementById('cardTopTagContainer').innerHTML =
+                    '<div class="flex justify-between font-bold text-slate-800"><span>' + topM + '</span><span class="' + (st.pnl>=0?'text-emerald-600':'text-rose-600') + '">' + formatPnlString(st.pnl) + '</span></div>' +
+                    '<div class="text-[11px] text-slate-500">' + st.count + ' lenh | ' + wr + '% wr</div>';
+            } else {
+                document.getElementById('cardTopTagContainer').innerHTML =
+                    '<div class="flex justify-between font-bold text-slate-800"><span>--</span><span class="text-slate-400">$0</span></div><div class="text-[11px] text-slate-500">No metric</div>';
+            }
+
+            // HOUR ANALYSIS (entry time slot) - highest win rate / least profitable
+            const durStats = {};
+            filteredTrades.forEach(t => {
+                const d = (typeof formatHourLabel === 'function' ? formatHourLabel(t.hour) : (t.hour || '')).replace(/\s*\((AM )?Macro\)/gi, '').trim() || 'Unknown';
+                if (!durStats[d]) durStats[d] = { pnl: 0, count: 0, wins: 0 };
+                durStats[d].pnl += Number(t.pnl) || 0;
+                durStats[d].count += 1;
+                if (Number(t.pnl) > 0) durStats[d].wins += 1;
+            });
+            const durList = Object.entries(durStats).filter(x => x[1].count > 0);
+            if (durList.length > 0) {
+                const byWr = [...durList].sort((a,b) => (b[1].wins/b[1].count) - (a[1].wins/a[1].count));
+                const byPnl = [...durList].sort((a,b) => a[1].pnl - b[1].pnl);
+                const best = byWr[0];
+                const worst = byPnl[0];
+                const bestWr = (best[1].wins/best[1].count*100).toFixed(0);
+                document.getElementById('cardHighestDuration').innerText = best[0] + ' (' + bestWr + '%)';
+                const worstWr = (worst[1].count ? (worst[1].wins / worst[1].count * 100) : 0).toFixed(0);
+                document.getElementById('cardLeastDuration').innerText = worst[0] + ' (' + worstWr + '%)';
+            } else {
+                document.getElementById('cardHighestDuration').innerText = '--';
+                document.getElementById('cardLeastDuration').innerText = '--';
+            }
+
 
             document.getElementById('cardTotalTradesCount').innerText = totalTrades;
             document.getElementById('cardLongestWin').innerText = `${wins} trades`;
             document.getElementById('cardLongestLoss').innerText = `${losses} trades`;
             document.getElementById('cardCurrentStreak').innerText = `${wins} wins`;
 
-            const sortedByDate = [...filteredTrades].sort((a,b) => new Date(a.date) - new Date(b.date));
+            const sortedByDate = [...filteredTrades].sort((a,b) => parseLocalDate(a.date) - parseLocalDate(b.date));
             let peak = 0;
             let maxDD = 0;
             let runningSum = 0;
@@ -2189,16 +2762,67 @@
             document.getElementById('cardPeakVal').innerText = formatPnlString(Math.max(0, peak));
             document.getElementById('cardMaxDD').innerText = maxDD > 0 ? `-$${maxDD.toLocaleString()}` : `$0`;
 
-            const recoveryFactor = maxDD > 0 ? (netProfit / maxDD).toFixed(2) : (netProfit > 0 ? '15.00' : '0.00');
+            // Recovery Factor = Net Profit / Max Drawdown
+            let recoveryFactor = 'N/A';
+            if (maxDD > 0) recoveryFactor = (netProfit / maxDD).toFixed(2);
+            else if (totalTrades === 0) recoveryFactor = 'N/A';
+            else if (netProfit > 0) recoveryFactor = '∞';
+            else recoveryFactor = '0.00';
             document.getElementById('cardRecoveryFactor').innerText = recoveryFactor;
+            const rfSub = document.querySelector('#cardRecoveryFactor')?.parentElement?.querySelector('.text-\\[11px\\]');
+            // update DD sub labels if present
+            const ddLabel = document.getElementById('cardMaxDD');
 
-            const maxWinTrade = validWins.length > 0 ? Math.max(...validWins.map(t => Number(t.pnl))) : 0;
-            const consistencyPct = netProfit > 0 ? Math.min(100, (maxWinTrade / netProfit) * 100) : 0;
-            document.getElementById('cardConsistency').innerText = consistencyPct.toFixed(2) + '%';
+            // Consistency = % of trading days that were profitable
+            const dayMap = {};
+            filteredTrades.forEach(t => {
+                if (!dayMap[t.date]) dayMap[t.date] = 0;
+                dayMap[t.date] += Number(t.pnl) || 0;
+            });
+            const dayVals = Object.values(dayMap);
+            const greenDays = dayVals.filter(v => v > 0).length;
+            const consistencyPct = dayVals.length > 0 ? (greenDays / dayVals.length * 100) : 0;
+            document.getElementById('cardConsistency').innerText = dayVals.length ? (consistencyPct.toFixed(1) + '%') : 'N/A';
             document.getElementById('consistencyBar').style.width = Math.min(100, Math.max(0, consistencyPct)) + '%';
 
-            document.getElementById('cardSharpe').innerText = '6.95';
-            document.getElementById('cardSortino').innerText = 'N/A';
+            // Sharpe-like ratio (trade-level): mean(pnl) / stdev(pnl)
+            // Sortino-like: mean(pnl) / downside stdev (only losses)
+            const pnls = filteredTrades.map(t => Number(t.pnl) || 0);
+            let sharpeStr = 'N/A';
+            let sortinoStr = 'N/A';
+            let sharpeSub = 'Total Return: 0%';
+            let sortinoSub = 'Downside Risk: 0.00%';
+            if (pnls.length >= 2) {
+                const mean = pnls.reduce((a,b)=>a+b,0) / pnls.length;
+                const variance = pnls.reduce((a,b)=>a + Math.pow(b - mean, 2), 0) / (pnls.length - 1);
+                const stdev = Math.sqrt(variance);
+                if (stdev > 0) sharpeStr = (mean / stdev).toFixed(2);
+                else if (mean > 0) sharpeStr = '∞';
+                else sharpeStr = '0.00';
+
+                const downside = pnls.filter(p => p < 0);
+                if (downside.length > 0) {
+                    const dVar = downside.reduce((a,b)=>a + Math.pow(b, 2), 0) / downside.length;
+                    const dStd = Math.sqrt(dVar);
+                    sortinoSub = 'Downside Risk: ' + dStd.toFixed(2);
+                    if (dStd > 0) sortinoStr = (mean / dStd).toFixed(2);
+                    else sortinoStr = mean > 0 ? '∞' : '0.00';
+                } else {
+                    sortinoStr = mean > 0 ? '∞' : 'N/A';
+                    sortinoSub = 'Downside Risk: 0.00';
+                }
+                const totalRet = netProfit;
+                sharpeSub = 'Mean/Stdev (trades)';
+            } else if (pnls.length === 1) {
+                sharpeStr = 'N/A';
+                sortinoStr = 'N/A';
+                sharpeSub = 'Need ≥2 trades';
+            }
+            document.getElementById('cardSharpe').innerText = sharpeStr;
+            const sharpeSubEl = document.getElementById('cardSharpeSub');
+            if (sharpeSubEl) sharpeSubEl.innerText = sharpeSub;
+            document.getElementById('cardSortino').innerText = sortinoStr;
+
         }
 
         function renderPlanner() {
@@ -2241,7 +2865,7 @@
             for (let i = 0; i < 7; i++) {
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + i);
-                const dStr = d.toISOString().split('T')[0];
+                const dStr = toLocalISODate(d);
                 const dTrades = filteredTrades.filter(t => t.date === dStr);
                 const dPnl = dTrades.reduce((sum, t) => sum + Number(t.pnl), 0);
                 weekProfitSum += dPnl;
@@ -2285,7 +2909,7 @@
         function shiftPlannerWeek(dir) {
             const d = new Date(appState.plannerDate);
             d.setDate(d.getDate() + (dir * 7));
-            appState.plannerDate = d.toISOString().split('T')[0];
+            appState.plannerDate = toLocalISODate(d);
             renderPlanner();
         }
 
@@ -2364,7 +2988,7 @@
                             const ctx = canvas.getContext('2d');
                             let width = img.width;
                             let height = img.height;
-                            const maxDim = 800;
+                            const maxDim = 1800;
                             if (width > height && width > maxDim) {
                                 height *= maxDim / width;
                                 width = maxDim;
@@ -2375,7 +2999,7 @@
                             canvas.width = width;
                             canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
-                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
                             currentModalImages.push(compressedDataUrl);
                             renderImagePreviews();
                         };
@@ -2455,6 +3079,7 @@
         }
 
         function renderTradeLog() {
+            if (typeof refreshSymbolFilterOptions === 'function') refreshSymbolFilterOptions();
             const tbody = document.getElementById('tradeLogTableBody');
             if (!tbody) return;
             tbody.innerHTML = '';
@@ -2472,10 +3097,15 @@
             sortedDates.forEach(dateStr => {
                 const dayTrades = grouped[dateStr];
                 
+                const dayPnl = dayTrades.reduce((s, t) => s + (Number(t.pnl) || 0), 0);
+                const dayPnlColor = dayPnl > 0 ? 'text-emerald-600' : (dayPnl < 0 ? 'text-rose-600' : 'text-slate-600');
                 tbody.innerHTML += `
                     <tr class="bg-slate-100/80 font-bold text-slate-700">
-                        <td colspan="18" class="py-2 px-3.5 text-xs border-y border-slate-200">
+                        <td colspan="19" class="py-2 px-3.5 text-xs border-y border-slate-200">
                             <i class="fa-regular fa-calendar text-blue-600 mr-1.5"></i> ${dateStr} (${dayTrades.length} lệnh)
+                        </td>
+                        <td class="py-2 px-3.5 text-xs border-y border-slate-200 text-right whitespace-nowrap ${dayPnlColor}">
+                            ${formatPnlString(dayPnl)}
                         </td>
                     </tr>
                 `;
@@ -2515,17 +3145,24 @@
                     
                     const directionBadge = t.type === 'LONG' ? '<span class="text-emerald-600 font-bold">LONG</span>' : '<span class="text-rose-600 font-bold">SHORT</span>';
                     const returnPctVal = Number(t.returnPct) || 0;
+                    const riskVal = Number(t.risk);
+                    const rrVal = calcTradeRR(t);
+                    const riskDisplay = (riskVal > 0 && !isNaN(riskVal)) ? ('$' + riskVal.toLocaleString(undefined,{maximumFractionDigits:2})) : '<span class="text-slate-300">--</span>';
+                    const rrDisplay = (rrVal !== null && !isNaN(rrVal)) ? (rrVal.toFixed(2) + 'R') : '<span class="text-slate-300">--</span>';
+                    const rrColor = rrVal === null || isNaN(rrVal) ? 'text-slate-400' : (rrVal >= 3 ? 'text-violet-600' : (rrVal >= 2 ? 'text-emerald-600' : 'text-rose-600'));
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100 whitespace-nowrap">
                             <td class="p-3.5 font-bold text-slate-800">${t.symbol}</td>
+                            <td class="p-3.5 text-slate-700">${riskDisplay}</td>
                             <td class="p-3.5 ${pnlColor}">${pnlFormatted}</td>
                             <td class="p-3.5 ${returnPctVal>=0?'text-emerald-600 font-bold':'text-rose-600 font-bold'}">${returnPctVal>=0?'+':''}${returnPctVal.toFixed(2)}%</td>
+                            <td class="p-3.5 font-bold ${rrColor}">${rrDisplay}</td>
                             <td class="p-3.5">${directionBadge} / ${t.volume}</td>
                             <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono text-[11px] font-bold">${t.fees || '1m'}</span></td>
                             <td class="p-3.5">${t.entry}</td>
                             <td class="p-3.5">${t.close}</td>
-                            <td class="p-3.5 text-slate-500">${t.hour}</td>
+                            <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${getHourColorClass(t.hour)}">${formatHourLabel(t.hour)}</span></td>
                             <td class="p-3.5"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px]">${t.duration || '5m'}</span></td>
                             <td class="p-3.5"><span class="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full text-[10px] font-bold">${t.setup}</span></td>
                             <td class="p-3.5">${lossReasonDisplay}</td>
@@ -2533,8 +3170,8 @@
                             <td class="p-3.5">${holdMgmtDisplay}</td>
                             <td class="p-3.5">${emotionDisplay}</td>
                             <td class="p-3.5">${confluencesHtml}</td>
-                            <td class="p-3.5 max-w-xs text-slate-600 whitespace-normal">
-                                <div class="break-words leading-relaxed max-h-28 overflow-y-auto pr-1">${notesText || '<span class="text-slate-300">Không có ghi chú</span>'}</div>
+                            <td class="p-3.5 min-w-[220px] max-w-[420px] text-slate-600 whitespace-normal align-top">
+                                <div class="break-words leading-relaxed whitespace-pre-wrap">${notesText || '<span class="text-slate-300">Không có ghi chú</span>'}</div>
                             </td>
                             <td class="p-3.5 text-center">${chartThumbHtml}</td>
                             <td class="p-3.5 text-center space-x-2">
@@ -2548,6 +3185,7 @@
         }
 
         function exportCSV() {
+            if (typeof requirePro === "function" && !requirePro("Export CSV")) return;
             let csvContent = "data:text/csv;charset=utf-8,Symbol,P%26L,Volume,EntryTimeframe,Entry,Close,Date\n";
             const filteredTrades = getFilteredTrades();
             filteredTrades.forEach(t => {
@@ -2560,6 +3198,104 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        let currentLightboxImages = [];
+        let currentLightboxIndex = 0;
+
+        function openLightboxForTrade(tradeId, imgIndex) {
+            if (imgIndex === undefined) imgIndex = 0;
+            const trade = appState.trades.find(t => t.id === tradeId);
+            if (!trade) return;
+            const imgs = Array.isArray(trade.chartImgs) ? trade.chartImgs : (trade.chartImg ? [trade.chartImg] : []);
+            if (!imgs.length) return;
+            currentLightboxImages = imgs;
+            currentLightboxIndex = Math.max(0, Math.min(imgIndex, imgs.length - 1));
+            renderLightbox();
+            document.getElementById('lightboxModal').classList.remove('hidden');
+        }
+        function closeLightbox() {
+            document.getElementById('lightboxModal').classList.add('hidden');
+        }
+        function slideLightbox(dir) {
+            if (!currentLightboxImages.length) return;
+            currentLightboxIndex = (currentLightboxIndex + dir + currentLightboxImages.length) % currentLightboxImages.length;
+            renderLightbox();
+        }
+        function renderLightbox() {
+            const imgEl = document.getElementById('lightboxImage');
+            const counterEl = document.getElementById('lightboxCounter');
+            const thumbsEl = document.getElementById('lightboxThumbnails');
+            const prevBtn = document.getElementById('lightboxPrevBtn');
+            const nextBtn = document.getElementById('lightboxNextBtn');
+            if (!imgEl || !counterEl || !thumbsEl) return;
+            imgEl.src = currentLightboxImages[currentLightboxIndex];
+            counterEl.innerText = 'Anh ' + (currentLightboxIndex + 1) + ' / ' + currentLightboxImages.length;
+            if (prevBtn) prevBtn.style.display = currentLightboxImages.length > 1 ? '' : 'none';
+            if (nextBtn) nextBtn.style.display = currentLightboxImages.length > 1 ? '' : 'none';
+            thumbsEl.innerHTML = currentLightboxImages.map(function(src, i) {
+                const active = i === currentLightboxIndex ? 'ring-2 ring-blue-400' : 'opacity-60 hover:opacity-100';
+                return '<img src="' + src + '" onclick="currentLightboxIndex=' + i + ';renderLightbox();" class="h-14 w-20 object-cover rounded-lg border border-slate-600 cursor-pointer ' + active + '" />';
+            }).join('');
+        }
+
+        function setSelectValue(selectId, rawVal) {
+            const el = document.getElementById(selectId);
+            if (!el) return;
+            const val = (rawVal === undefined || rawVal === null) ? '' : String(rawVal).trim();
+            if (!val) { el.value = ''; return; }
+
+            // 1) exact
+            for (let i = 0; i < el.options.length; i++) {
+                if (el.options[i].value === val) { el.value = val; return; }
+            }
+            // 2) case-insensitive value or text
+            const lower = val.toLowerCase();
+            for (let i = 0; i < el.options.length; i++) {
+                const ov = (el.options[i].value || '').toLowerCase();
+                const ot = (el.options[i].text || '').toLowerCase();
+                if (ov === lower || ot === lower) { el.value = el.options[i].value; return; }
+            }
+            // 3) includes / fuzzy (hour labels, macros)
+            const cleaned = lower.replace(/\s*\((am\s*)?macro\)/gi, '').replace(/\s+/g, ' ').trim();
+            for (let i = 0; i < el.options.length; i++) {
+                const ov = (el.options[i].value || '').toLowerCase();
+                if (ov && (cleaned.includes(ov) || ov.includes(cleaned) || cleaned.replace(/\s/g,'') === ov.replace(/\s/g,''))) {
+                    el.value = el.options[i].value;
+                    return;
+                }
+            }
+            // 4) type aliases
+            if (selectId === 'modalType') {
+                if (/short|sell|ban|bán/i.test(val)) { el.value = 'SHORT'; return; }
+                if (/long|buy|mua/i.test(val)) { el.value = 'LONG'; return; }
+            }
+            // 5) no match: inject option so user still sees stored data
+            let opt = document.createElement('option');
+            opt.value = val;
+            opt.text = val + ' (from data)';
+            el.appendChild(opt);
+            el.value = val;
+        }
+
+        function normalizeTradeFields(t) {
+            if (!t || typeof t !== 'object') return t;
+            const out = Object.assign({}, t);
+            // type
+            const ty = String(out.type || out.side || out.direction || '').trim();
+            if (/short|sell|bán|ban/i.test(ty)) out.type = 'SHORT';
+            else if (/long|buy|mua/i.test(ty)) out.type = 'LONG';
+            else if (ty) out.type = ty.toUpperCase();
+            // hour cleanup
+            if (out.hour) {
+                out.hour = String(out.hour).replace(/\s*\((AM\s*)?Macro\)/gi, '').trim();
+            }
+            // aliases
+            if (!out.holdMgmt && out.holdManagement) out.holdMgmt = out.holdManagement;
+            if (!out.emotionalState && out.emotion) out.emotionalState = out.emotion;
+            if (!out.lossReason && out.error) out.lossReason = out.error;
+            if (!out.winReason && out.win) out.winReason = out.win;
+            return out;
         }
 
         function openTradeModal(tradeId = null) {
@@ -2576,21 +3312,23 @@
                     document.getElementById('modalAccount').value = t.account || appState.activeAccount;
                     document.getElementById('modalDate').value = t.date;
                     document.getElementById('modalSymbol').value = t.symbol;
-                    document.getElementById('modalType').value = t.type;
+                    setSelectValue('modalType', t.type || t.side || t.direction);
                     document.getElementById('modalEntry').value = t.entry;
                     document.getElementById('modalClose').value = t.close;
                     document.getElementById('modalVolume').value = t.volume;
-                    document.getElementById('modalFees').value = t.fees || '1m';
+                    setSelectValue('modalFees', t.fees || t.timeframe || t.entryTf || '1m');
                     document.getElementById('modalPnl').value = t.pnl;
+                    if (document.getElementById('modalRisk')) { document.getElementById('modalRisk').value = (t.risk != null ? t.risk : ''); }
+                    if (typeof updateModalRR === 'function') updateModalRR();
                     document.getElementById('modalReturnPct').value = t.returnPct;
-                    document.getElementById('modalSetup').value = t.setup;
-                    document.getElementById('modalLossReason').value = t.lossReason || '';
-                    document.getElementById('modalWinReason').value = t.winReason || '';
-                    document.getElementById('modalHoldMgmt').value = t.holdMgmt || '';
-                    document.getElementById('modalEmotionalState').value = t.emotionalState || '';
+                    setSelectValue('modalSetup', t.setup);
+                    setSelectValue('modalLossReason', t.lossReason || '');
+                    setSelectValue('modalWinReason', t.winReason || '');
+                    setSelectValue('modalHoldMgmt', t.holdMgmt || t.holdManagement || '');
+                    setSelectValue('modalEmotionalState', t.emotionalState || t.emotion || '');
                     document.getElementById('modalNotes').value = t.notes || '';
-                    document.getElementById('modalDuration').value = t.duration || '5m';
-                    document.getElementById('modalHour').value = t.hour;
+                    setSelectValue('modalDuration', t.duration || '5m');
+                    setSelectValue('modalHour', t.hour);
                     document.getElementById('modalTvLink').value = t.tvLink || '';
 
                     document.querySelectorAll('input[name="smcConfluence"]').forEach(cb => {
@@ -2604,7 +3342,7 @@
                 document.getElementById('tradeModalTitle').innerText = '+ THÊM GIAO DỊCH MỚI';
                 document.getElementById('editTradeId').value = '';
                 document.getElementById('modalAccount').value = appState.activeAccount;
-                document.getElementById('modalDate').value = realNow.toISOString().split('T')[0];
+                document.getElementById('modalDate').value = toLocalISODate(realNow);
                 document.getElementById('modalFees').value = '1m'; 
                 document.getElementById('modalDuration').value = '5m'; 
                 document.getElementById('modalEntry').value = '';
@@ -2626,6 +3364,7 @@
             const saveBtn = document.getElementById('saveTradeBtn');
             try {
                 const pnlVal = Number(document.getElementById('modalPnl').value);
+                const riskVal = Number(document.getElementById('modalRisk')?.value);
                 if (isNaN(pnlVal)) {
                     alert("Vui lòng nhập kết quả P&L ($) hợp lệ!");
                     return;
@@ -2638,7 +3377,7 @@
 
                 const id = document.getElementById('editTradeId').value || 't-' + Date.now();
                 const account = document.getElementById('modalAccount').value || appState.activeAccount;
-                const date = document.getElementById('modalDate').value || realNow.toISOString().split('T')[0];
+                const date = document.getElementById('modalDate').value || toLocalISODate(realNow);
                 const symbol = document.getElementById('modalSymbol').value || 'NQ';
                 const type = document.getElementById('modalType').value || 'LONG';
                 const entry = Number(document.getElementById('modalEntry').value) || 0;
@@ -2646,7 +3385,7 @@
                 const volume = Number(document.getElementById('modalVolume').value) || 1;
                 const fees = document.getElementById('modalFees').value || '1m';
                 const returnPct = Number(document.getElementById('modalReturnPct').value) || 0;
-                const setup = document.getElementById('modalSetup').value || 'Continuation';
+                const setup = document.getElementById('modalSetup').value || '';
                 const lossReason = document.getElementById('modalLossReason').value || '';
                 const winReason = document.getElementById('modalWinReason').value || '';
                 const holdMgmt = document.getElementById('modalHoldMgmt').value || '';
@@ -2661,7 +3400,8 @@
 
                 const chartImgs = Array.isArray(currentModalImages) ? [...currentModalImages] : [];
 
-                const tradeObj = { id, account, date, symbol, type, entry, close, volume, fees, pnl: pnlVal, returnPct, setup, lossReason, winReason, holdMgmt, emotionalState, confluences, notes, duration, hour, tvLink, chartImgs };
+                const tradeObj = { id, account, date, symbol, type, entry, close, volume, fees, pnl: pnlVal,
+                    risk: (!isNaN(riskVal) && riskVal > 0) ? riskVal : null, returnPct, setup, lossReason, winReason, holdMgmt, emotionalState, confluences, notes, duration, hour, tvLink, chartImgs };
 
                 const existingIdx = appState.trades.findIndex(t => t.id === id);
                 if (existingIdx >= 0) {
@@ -2704,6 +3444,7 @@
         let parsedBatchTrades = [];
 
         function openBatchModal() {
+            if (typeof requirePro === "function" && !requirePro("Batch Import")) return;
             document.getElementById('batchModal').classList.remove('hidden');
             document.getElementById('batchTextArea').value = '';
             document.getElementById('batchPreviewSection').classList.add('hidden');
@@ -2730,11 +3471,11 @@
             lines.forEach((line, idx) => {
                 const parts = line.split(',').map(p => p.trim());
                 if (parts.length >= 7) {
-                    const [date, symbol, type, entry, close, volume, pnl, setup = 'Continuation', lossReason = '', winReason = '', holdMgmt = '', emotionalState = 'Confident'] = parts;
+                    const [date, symbol, type, entry, close, volume, pnl, risk = '', hour = '', setup = 'ob', lossReason = '', winReason = '', holdMgmt = '', emotionalState = ''] = parts;
                     const tradeObj = {
                         id: 'batch-' + Date.now() + '-' + idx,
                         account: appState.activeAccount,
-                        date: date || realNow.toISOString().split('T')[0],
+                        date: date || toLocalISODate(realNow),
                         symbol: (symbol || 'NQ').toUpperCase(),
                         type: (type || 'LONG').toUpperCase(),
                         entry: Number(entry) || 0,
@@ -2743,7 +3484,7 @@
                         fees: '1m',
                         pnl: Number(pnl) || 0,
                         returnPct: ((Number(pnl) || 0) / 100000) * 100,
-                        setup: setup || 'Continuation',
+                        setup: setup || '',
                         lossReason,
                         winReason,
                         holdMgmt,
@@ -2797,64 +3538,26 @@
         }
 
         /* LIGHTBOX MULTI-IMAGE VIEWER */
-        let currentLightboxImages = [];
-        let currentLightboxIndex = 0;
+        
+        
+        let lbX = 0, lbY = 0;
+        
+        let lbStartX = 0, lbStartY = 0, lbOrigX = 0, lbOrigY = 0;
 
-        function openLightboxForTrade(tradeId, imgIndex = 0) {
-            const trade = appState.trades.find(t => t.id === tradeId);
-            if (trade) {
-                const imgs = Array.isArray(trade.chartImgs) ? trade.chartImgs : (trade.chartImg ? [trade.chartImg] : []);
-                if (imgs.length > 0) {
-                    currentLightboxImages = imgs;
-                    currentLightboxIndex = Math.max(0, Math.min(imgIndex, imgs.length - 1));
-                    renderLightbox();
-                    document.getElementById('lightboxModal').classList.remove('hidden');
-                }
-            }
-        }
+        
+        
+        
+        
+        
+        
+        
+        
 
-        function renderLightbox() {
-            const imgEl = document.getElementById('lightboxImage');
-            const counterEl = document.getElementById('lightboxCounter');
-            const thumbsEl = document.getElementById('lightboxThumbnails');
-            const prevBtn = document.getElementById('lightboxPrevBtn');
-            const nextBtn = document.getElementById('lightboxNextBtn');
-
-            if (!imgEl || !counterEl || !thumbsEl) return;
-
-            imgEl.src = currentLightboxImages[currentLightboxIndex];
-            counterEl.innerText = `Ảnh ${currentLightboxIndex + 1} / ${currentLightboxImages.length}`;
-
-            if (currentLightboxImages.length > 1) {
-                prevBtn.classList.remove('hidden');
-                nextBtn.classList.remove('hidden');
-            } else {
-                prevBtn.classList.add('hidden');
-                nextBtn.classList.add('hidden');
-            }
-
-            thumbsEl.innerHTML = '';
-            currentLightboxImages.forEach((url, idx) => {
-                const activeBorder = idx === currentLightboxIndex ? 'border-blue-500 ring-2 ring-blue-500/50 scale-105' : 'border-slate-700 opacity-60 hover:opacity-100';
-                thumbsEl.innerHTML += `
-                    <img src="${url}" class="w-16 h-16 rounded-lg object-cover cursor-pointer border-2 ${activeBorder} transition flex-shrink-0" onclick="selectLightboxIndex(${idx})" onerror="this.src='https://placehold.co/100x100/ef4444/ffffff?text=Lỗi'">
-                `;
-            });
-        }
-
+        
         function selectLightboxIndex(idx) {
             currentLightboxIndex = idx;
             renderLightbox();
         }
-
-        function slideLightbox(dir) {
-            currentLightboxIndex += dir;
-            if (currentLightboxIndex < 0) currentLightboxIndex = currentLightboxImages.length - 1;
-            if (currentLightboxIndex >= currentLightboxImages.length) currentLightboxIndex = 0;
-            renderLightbox();
-        }
-
-        function closeLightbox() { document.getElementById('lightboxModal').classList.add('hidden'); }
 
         function openAccountModal() { document.getElementById('accountModal').classList.remove('hidden'); }
         function closeAccountModal() { document.getElementById('accountModal').classList.add('hidden'); }
@@ -2957,7 +3660,7 @@
             const ctx = document.getElementById('winrateCumulativeChart').getContext('2d');
             if (chartInstances['wrCumul']) chartInstances['wrCumul'].destroy();
             
-            const sorted = [...filteredTrades].sort((a,b) => new Date(a.date) - new Date(b.date));
+            const sorted = [...filteredTrades].sort((a,b) => parseLocalDate(a.date) - parseLocalDate(b.date));
             let cumSum = 0;
             let labels = ['Bắt đầu'];
             let dataPoints = [0];
@@ -3020,7 +3723,7 @@
             });
 
             weekDates.forEach((d, idx) => {
-                const dIso = d.toISOString().split('T')[0];
+                const dIso = toLocalISODate(d);
                 const dayTrades = filteredTrades.filter(t => t.date === dIso);
                 counts[idx] = dayTrades.length;
                 const dayPnl = dayTrades.reduce((s, t) => s + Number(t.pnl), 0);
@@ -3128,7 +3831,7 @@
                 weekLabels.push(`Tuần ${idx + 1}`);
 
                 let wTrades = filteredTrades.filter(t => {
-                    const tDate = new Date(t.date);
+                    const tDate = parseLocalDate(t.date);
                     return tDate >= w.start && tDate <= w.end;
                 });
 
@@ -3206,7 +3909,7 @@
 
             const filteredTrades = getFilteredTrades();
             filteredTrades.forEach(t => {
-                const m = new Date(t.date).getMonth();
+                const m = parseLocalDate(t.date).getMonth();
                 counts[m]++;
                 profits[m] += Number(t.pnl);
                 volumes[m] += Number(t.volume || 1);
@@ -3257,11 +3960,11 @@
 
         function renderHourlyPerformance() {
             const macros = [
-                '09:30-09:40', '09:40-09:50', '09:50-10:10 (AM Macro)', '10:10-10:20', 
-                '10:20-10:30', '10:30-10:40', '10:40-10:50', '10:50-11:10 (AM Macro)',
+                '09:30-09:40', '09:40-09:50', '09:50-10:10', '10:10-10:20', 
+                '10:20-10:30', '10:30-10:40', '10:40-10:50', '10:50-11:10',
                 '11:10-11:20', '11:20-11:30', '11:30-11:40', '11:40-11:50',
-                '11:50-12:10 (Macro)', '12:10-12:20', '12:20-12:30', '12:30-12:40',
-                '12:40-12:50', '12:50-01:00', '01:00-01:10', '01:10-01:40 (Macro)',
+                '11:50-12:10', '12:10-12:20', '12:20-12:30', '12:30-12:40',
+                '12:40-12:50', '12:50-01:00', '01:00-01:10', '01:10-01:40',
                 '01:40-01:50', '01:50-02:00'
             ];
             let counts = new Array(22).fill(0);
@@ -3323,22 +4026,85 @@
         }
 
         window.onload = async function() {
+            initSupabase();
+            // Wire auth buttons
+            var btnIn = document.getElementById('btnSignIn');
+            var btnUp = document.getElementById('btnSignUp');
+            var btnVault = document.getElementById('btnVaultSubmit');
+            var btnG = document.getElementById('btnGoogleSignIn');
+            var btnGH = document.getElementById('btnGoogleSignInHeader');
+            if (btnIn) btnIn.onclick = function() { signInWithEmail(); };
+            if (btnUp) btnUp.onclick = function() { signUpWithEmail(); };
+            if (btnVault) btnVault.onclick = function() { submitVault(); };
+            if (btnG) btnG.onclick = function() { signInWithGoogle(); };
+            if (btnGH) btnGH.onclick = function() { signInWithGoogle(); };
+            document.getElementById('emailAuthPass')?.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') signInWithEmail();
+            });
+            document.getElementById('vaultPassUnlock')?.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') submitVault();
+            });
+
             showLockedUI();
             if (!supabaseClient) {
-                console.warn('Supabase chưa cấu hình — điền SUPABASE_URL và SUPABASE_ANON_KEY trong file HTML');
-            } else {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                await onAuthReady(session);
-                supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-                        await onAuthReady(session);
-                    } else if (event === 'SIGNED_OUT') {
-                        await onAuthReady(null);
-                    }
-                });
+                showAuthMsg('Cannot load Supabase. Check network / CDN.');
+                return;
             }
-            checkBackupReminder();
+            const sessionRes = await supabaseClient.auth.getSession();
+            await onAuthReady(sessionRes.data.session);
+            supabaseClient.auth.onAuthStateChange(async function(event, session) {
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+                    await onAuthReady(session);
+                } else if (event === 'SIGNED_OUT') {
+                    await onAuthReady(null);
+                }
+            });
+            if (typeof checkBackupReminder === 'function') checkBackupReminder();
         };
     </script>
+
+    <div id="vaultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h3 id="vaultModalTitle" class="text-sm font-bold text-slate-900 mb-1">Open Vault</h3>
+            <p class="text-[11px] text-slate-500 mb-4">Master Password never leaves this device. Losing it = cannot decrypt data.</p>
+            <div id="vaultSetupFields" class="hidden space-y-2 mb-3">
+                <input id="vaultPassSetup" type="password" placeholder="Create Master Password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs">
+                <input id="vaultPassSetup2" type="password" placeholder="Confirm Master Password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs">
+            </div>
+            <div id="vaultUnlockFields" class="space-y-2 mb-3">
+                <input id="vaultPassUnlock" type="password" placeholder="Master Password" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs">
+            </div>
+            <p id="vaultErr" class="text-[11px] text-rose-600 hidden mb-2"></p>
+            <button type="button" id="btnVaultSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-lg">Continue</button>
+        </div>
+    </div>
+
+
+    <!-- UPGRADE PRO MODAL -->
+    <div id="upgradeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Nang cap Pro</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tinh nang <span id="upgradeFeatureName" class="font-semibold text-violet-600">Pro</span> chi co trong goi Pro.</p>
+                </div>
+                <button type="button" onclick="closeUpgradeModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1.5 mb-4 bg-slate-50 rounded-xl p-3 border border-slate-100">
+                <li class="flex gap-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Full Time Analysis (Day / Week / Month / Hour)</li>
+                <li class="flex gap-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Winrate Analysis + Advanced Analytics</li>
+                <li class="flex gap-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Risk / Reward statistics</li>
+                <li class="flex gap-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Batch import + Export CSV</li>
+                <li class="flex gap-2"><i class="fa-solid fa-check text-emerald-500 mt-0.5"></i> Online sync + E2E vault</li>
+            </ul>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeUpgradeModal()" class="flex-1 text-xs font-semibold py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">De sau</button>
+                <button type="button" onclick="setPlan('pro'); closeUpgradeModal();" class="flex-1 text-xs font-bold py-2.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 shadow-sm">Kich hoat Pro (test)</button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-3 text-center">Ban production: nut nay se mo Stripe/Lemon checkout. Hien tai dung de test phan quyen.</p>
+            <p class="text-[10px] text-center mt-1"><button type="button" class="text-slate-500 underline" onclick="setPlan('basic'); closeUpgradeModal();">Ve Basic (test)</button></p>
+        </div>
+    </div>
+
 </body>
 </html>
